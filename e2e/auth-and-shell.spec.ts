@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { strings } from '../src/strings/en';
 import { newAccount, signUpAndConfirm, uniqueEmail } from './support/account';
+import { pickFromList } from './support/select';
 
 test('new user signs up, confirms email, picks a base currency and lands in the app', async ({ page }, testInfo) => {
   await page.goto('/');
@@ -10,9 +11,8 @@ test('new user signs up, confirms email, picks a base currency and lands in the 
   await signUpAndConfirm(page, uniqueEmail('signup', testInfo));
 
   // First run: base currency defaults from the browser locale (en-US -> USD).
-  const currency = page.getByLabel(strings.onboarding.currencyLabel);
-  await expect(currency).toHaveValue('USD');
-  await currency.selectOption('INR');
+  await expect(page.getByRole('combobox', { name: strings.onboarding.currencyLabel })).toContainText('USD');
+  await pickFromList(page, strings.onboarding.currencyLabel, /^INR ·/);
   await page.getByRole('button', { name: strings.onboarding.submit }).click();
 
   await expect(page).toHaveURL(/\/$/);
@@ -37,6 +37,9 @@ test('responsive shell, add dialog, theme and sign out', async ({ page, isMobile
   }
 
   // Add opens as a bottom sheet on phones and a centered dialog on desktop; Escape closes it.
+  // "Centered" means over the page's layout area: the page always reserves the scrollbar's width
+  // (scrollbar-gutter), and the <html> box excludes it even where scrollbars are hidden.
+  const visibleWidth = await page.evaluate(() => document.documentElement.getBoundingClientRect().width);
   await page.getByRole('button', { name: strings.nav.addLong }).first().click();
   const dialog = page.getByRole('dialog', { name: strings.form.addTitle });
   await expect(dialog).toBeVisible();
@@ -47,7 +50,7 @@ test('responsive shell, add dialog, theme and sign out', async ({ page, isMobile
     expect(box.width).toBeGreaterThan(viewport.width - 2);
   } else {
     const centerX = box.x + box.width / 2;
-    expect(Math.abs(centerX - viewport.width / 2)).toBeLessThan(4);
+    expect(Math.abs(centerX - visibleWidth / 2)).toBeLessThan(4);
     expect(box.width).toBeLessThan(600);
   }
   await page.keyboard.press('Escape');

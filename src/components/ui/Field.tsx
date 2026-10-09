@@ -1,5 +1,6 @@
-import { useId, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from 'react';
+import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import { cx } from '@/lib/cx';
+import { Select, type SelectItems } from './Select';
 
 const controlClass =
   'block w-full rounded-control border border-control-border bg-surface px-3.5 text-base text-fg ' +
@@ -7,18 +8,26 @@ const controlClass =
 
 type FieldShellProps = {
   id: string;
+  /** For controls that aren't form elements (Select): the label gets this id, and focuses the control when clicked. */
+  labelId?: string;
   label: string;
   hint?: string | undefined;
   error?: string | undefined;
   children: ReactNode;
 };
 
-function FieldShell({ id, label, hint, error, children }: FieldShellProps) {
+function FieldShell({ id, labelId, label, hint, error, children }: FieldShellProps) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-fg">
-        {label}
-      </label>
+      {labelId ? (
+        <label id={labelId} onClick={() => document.getElementById(id)?.focus()} className="text-sm font-medium text-fg">
+          {label}
+        </label>
+      ) : (
+        <label htmlFor={id} className="text-sm font-medium text-fg">
+          {label}
+        </label>
+      )}
       {children}
       {hint && !error && (
         <p id={`${id}-hint`} className="text-sm text-fg-muted">
@@ -60,26 +69,39 @@ export function TextField({ label, hint, error, className, id: idProp, ...rest }
   );
 }
 
-type SelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+type SelectFieldProps = {
   label: string;
   hint?: string | undefined;
   error?: string | undefined;
+  value: string;
+  onChange: (value: string) => void;
+  items: SelectItems;
+  /** Shown while no option is chosen. */
+  placeholder?: string | undefined;
+  disabled?: boolean;
+  className?: string;
+  id?: string;
 };
 
-export function SelectField({ label, hint, error, className, id: idProp, children, ...rest }: SelectFieldProps) {
+/** A labelled field with the app's own dropdown (see Select). */
+export function SelectField({ label, hint, error, value, onChange, items, placeholder, disabled, className, id: idProp }: SelectFieldProps) {
   const generated = useId();
-  const id = idProp ?? generated;
+  const id = idProp ?? `select${generated}`;
+  const labelId = `${id}-label`;
   return (
-    <FieldShell id={id} label={label} hint={hint} error={error}>
-      <select
+    <FieldShell id={id} labelId={labelId} label={label} hint={hint} error={error}>
+      <Select
         id={id}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, hint, error)}
-        className={cx(controlClass, 'h-12', className)}
-        {...rest}
-      >
-        {children}
-      </select>
+        labelledBy={labelId}
+        describedBy={describedBy(id, hint, error)}
+        invalid={Boolean(error)}
+        value={value}
+        onChange={onChange}
+        items={items}
+        placeholder={placeholder}
+        disabled={disabled ?? false}
+        triggerClassName={cx(controlClass, 'h-12', className)}
+      />
     </FieldShell>
   );
 }

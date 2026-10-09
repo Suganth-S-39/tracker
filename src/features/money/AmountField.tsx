@@ -1,4 +1,5 @@
-import { useId } from 'react';
+import { useId, useMemo } from 'react';
+import { Select } from '@/components/ui/Select';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import type { MoneyContext } from './useMoney';
@@ -31,7 +32,13 @@ export function AmountField({
   autoFocus = false,
 }: AmountFieldProps) {
   const amountId = useId();
-  const currencyId = useId();
+  const currencyId = `currency${useId()}`;
+  // The list shows "USD · US dollar"; the closed control just "USD". Options are only rendered
+  // while the list is open, so ~150 currencies cost nothing when a form opens.
+  const currencyItems = useMemo(
+    () => money.currencies.map((c) => ({ value: c.code, label: `${c.code} · ${c.name}`, triggerLabel: c.code })),
+    [money.currencies],
+  );
   return (
     <div>
       <div className="flex items-end gap-3">
@@ -56,22 +63,18 @@ export function AmountField({
           />
         </div>
         <div className="w-28">
-          <label htmlFor={currencyId} className="text-sm font-medium">
+          <label id={`${currencyId}-label`} onClick={() => document.getElementById(currencyId)?.focus()} className="text-sm font-medium">
             {strings.form.currency}
           </label>
-          <select
+          <Select
             id={currencyId}
+            labelledBy={`${currencyId}-label`}
             value={currency}
+            onChange={onCurrencyChange}
+            items={currencyItems}
             disabled={currencyLocked}
-            onChange={(e) => onCurrencyChange(e.target.value)}
-            className="mt-1.5 block h-16 w-full rounded-control border border-control-border bg-surface px-3 text-base font-semibold disabled:opacity-60"
-          >
-            {money.currencies.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code}
-              </option>
-            ))}
-          </select>
+            triggerClassName="mt-1.5 h-16 w-full rounded-control border border-control-border bg-surface px-3 text-base font-semibold"
+          />
         </div>
       </div>
       {error ? (

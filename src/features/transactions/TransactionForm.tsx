@@ -192,13 +192,12 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
           <div className="grid gap-4 wide:grid-cols-2">
             <TextField label={s.note} hint={strings.common.optional} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
             {editing ? null : (
-              <SelectField label={strings.recurring.repeat} value={repeat} onChange={(e) => setRepeat(e.target.value as Repeat)}>
-                {REPEAT_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {strings.recurring.frequencies[option]}
-                  </option>
-                ))}
-              </SelectField>
+              <SelectField
+                label={strings.recurring.repeat}
+                value={repeat}
+                onChange={(v) => setRepeat(v as Repeat)}
+                items={REPEAT_OPTIONS.map((option) => ({ value: option, label: strings.recurring.frequencies[option] }))}
+              />
             )}
           </div>
 

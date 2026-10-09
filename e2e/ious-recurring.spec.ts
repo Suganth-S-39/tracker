@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { addMonths, formatDate, monthOf, monthRange, todayLocal } from '../src/domain/dates';
 import { strings } from '../src/strings/en';
 import { newAccount } from './support/account';
+import { pickFromList } from './support/select';
 
 const s = strings.ious;
 
@@ -70,7 +71,7 @@ test('recurring: repeat when adding, then manage it in Settings', async ({ page 
   await dialog.getByLabel(strings.form.amount, { exact: true }).fill('1200');
   await dialog.locator('label').filter({ hasText: /^Rent$/ }).click();
   await dialog.getByLabel(strings.form.payee.expense).fill('Landlord');
-  await dialog.getByLabel(strings.recurring.repeat).selectOption('monthly');
+  await pickFromList(dialog, strings.recurring.repeat, strings.recurring.frequencies.monthly);
   await dialog.getByRole('button', { name: strings.form.save.expense }).click();
   await expect(dialog).toBeHidden();
 

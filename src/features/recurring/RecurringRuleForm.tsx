@@ -89,13 +89,12 @@ export function RecurringRuleForm({
       />
       <CategoryPicker categories={options} value={categoryId} onChange={setCategoryId} error={shown(errors.category)} />
       <div className="grid grid-cols-2 gap-3">
-        <SelectField label={s.form.frequency} value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
-          {FREQUENCIES.map((f) => (
-            <option key={f} value={f}>
-              {s.frequencies[f]}
-            </option>
-          ))}
-        </SelectField>
+        <SelectField
+          label={s.form.frequency}
+          value={frequency}
+          onChange={(v) => setFrequency(v as Frequency)}
+          items={FREQUENCIES.map((f) => ({ value: f, label: s.frequencies[f] }))}
+        />
         <TextField label={s.form.nextDate} type="date" required value={nextDueDate} onChange={(e) => setNextDueDate(e.target.value)} error={shown(errors.date)} />
       </div>
       <TextField label={strings.form.payee[rule.type]} hint={strings.common.optional} maxLength={100} value={payee} onChange={(e) => setPayee(e.target.value)} />

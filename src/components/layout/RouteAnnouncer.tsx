@@ -21,7 +21,9 @@ export function RouteAnnouncer() {
     const timer = window.setTimeout(() => {
       const title = document.title.split(' · ')[0] ?? document.title;
       setMessage(strings.a11y.navigatedTo(title));
-      document.getElementById('main')?.focus({ preventScroll: true });
+      // Unless the person has already moved into the new page (don't pull focus from under them).
+      const main = document.getElementById('main');
+      if (main && !main.contains(document.activeElement)) main.focus({ preventScroll: true });
     }, 50);
     return () => window.clearTimeout(timer);
   }, [pathname]);

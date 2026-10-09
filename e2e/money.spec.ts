@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import { strings } from '../src/strings/en';
 import { newAccount } from './support/account';
+import { pickFromList } from './support/select';
 
 // Base currency INR, browser locale en-US: amounts look like "₹120.50".
 
@@ -52,7 +53,7 @@ test('add, convert, edit and see it on Home', async ({ page }, testInfo) => {
   await openAdd(page);
   await chooseOption(dialog, strings.form.kinds.income);
   await dialog.getByLabel(strings.form.amount, { exact: true }).fill('100');
-  await dialog.getByLabel(strings.form.currency).selectOption('USD');
+  await pickFromList(dialog, strings.form.currency, /^USD ·/);
   const converted = dialog.getByLabel(strings.form.conversion.converted('INR'));
   await converted.fill('8300');
   await expect(dialog.getByLabel(strings.form.conversion.rate('USD', 'INR'))).toHaveValue('83');
@@ -119,7 +120,7 @@ test('transactions page: search, filter, delete and undo', async ({ page, isMobi
   await expect(rows).toHaveCount(3);
 
   // Filter by category.
-  await page.getByLabel(strings.transactions.filters.category).selectOption({ label: 'Transport' });
+  await pickFromList(page, strings.transactions.filters.category, 'Transport');
   await expect(rows).toHaveCount(1);
   await page.getByRole('button', { name: strings.transactions.clearFilters }).click();
   await expect(rows).toHaveCount(3);

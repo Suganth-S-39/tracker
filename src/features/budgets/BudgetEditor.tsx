@@ -74,18 +74,11 @@ export function BudgetEditor({ target, month, money, availableCategories, catego
           <SelectField
             label={s.editor.category}
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
+            onChange={setCategoryId}
+            placeholder={s.editor.category}
+            items={availableCategories.map((c) => ({ value: c.id, label: categoryLabel(c) }))}
             error={showErrors ? errors.category : undefined}
-          >
-            <option value="" disabled>
-              {s.editor.category}
-            </option>
-            {availableCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {categoryLabel(c)}
-              </option>
-            ))}
-          </SelectField>
+          />
         )
       ) : null}
 

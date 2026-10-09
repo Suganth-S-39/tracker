@@ -1,11 +1,12 @@
 import { Plus, ReceiptText, Search, SearchX } from 'lucide-react';
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { TextField } from '@/components/ui/Field';
+import { Select, type SelectItems } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Stale } from '@/components/ui/Stale';
 import { categoryLabel, useCategories, useCategoryMap } from '@/features/categories/api';
@@ -23,32 +24,31 @@ const f = strings.transactions.filters;
 
 const SEARCH_DEBOUNCE_MS = 250;
 
-/** A native select styled as a filter chip: accessible and uses the phone's own picker. */
+/** A filter chip that opens the app's dropdown list (see Select). */
 function FilterSelect({
   label,
   active,
   value,
   onChange,
-  children,
+  items,
 }: {
   label: string;
   active: boolean;
   value: string;
   onChange: (value: string) => void;
-  children: ReactNode;
+  items: SelectItems;
 }) {
   return (
-    <select
-      aria-label={label}
+    <Select
+      label={label}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className={cx(
-        'h-9 shrink-0 cursor-pointer appearance-none rounded-full px-3.5 text-sm font-medium',
+      onChange={onChange}
+      items={items}
+      triggerClassName={cx(
+        'h-9 shrink-0 rounded-full pr-3 pl-3.5 text-sm font-medium',
         active ? 'bg-accent-strong text-on-accent' : 'bg-control text-fg',
       )}
-    >
-      {children}
-    </select>
+    />
   );
 }
 
@@ -103,43 +103,45 @@ export function TransactionsPage() {
           />
         </div>
 
-        <div role="group" aria-label={f.label} className="mt-3 flex items-center gap-2 overflow-x-auto pb-1">
-          <FilterSelect label={f.type} active={filters.type !== ''} value={filters.type} onChange={(v) => update({ type: v as FilterState['type'] })}>
-            <option value="">{f.allTypes}</option>
-            <option value="expense">{strings.form.kinds.expense}</option>
-            <option value="income">{strings.form.kinds.income}</option>
-          </FilterSelect>
+        {/* Padding inside the scrolling row (offset by negative margins), so focus rings aren't clipped. */}
+        <div role="group" aria-label={f.label} className="-mx-1 mt-2 flex items-center gap-2 overflow-x-auto p-1">
+          <FilterSelect
+            label={f.type}
+            active={filters.type !== ''}
+            value={filters.type}
+            onChange={(v) => update({ type: v as FilterState['type'] })}
+            items={[
+              { value: '', label: f.allTypes },
+              { value: 'expense', label: strings.form.kinds.expense },
+              { value: 'income', label: strings.form.kinds.income },
+            ]}
+          />
 
-          <FilterSelect label={f.category} active={filters.categoryId !== ''} value={filters.categoryId} onChange={(v) => update({ categoryId: v })}>
-            <option value="">{f.allCategories}</option>
-            <optgroup label={strings.categories.sections.expense}>
-              {expenseCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c)}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label={strings.categories.sections.income}>
-              {incomeCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {categoryLabel(c)}
-                </option>
-              ))}
-            </optgroup>
-          </FilterSelect>
+          <FilterSelect
+            label={f.category}
+            active={filters.categoryId !== ''}
+            value={filters.categoryId}
+            onChange={(v) => update({ categoryId: v })}
+            items={[
+              { value: '', label: f.allCategories },
+              { label: strings.categories.sections.expense, options: expenseCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
+              { label: strings.categories.sections.income, options: incomeCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
+            ]}
+          />
 
           <FilterSelect
             label={f.date}
             active={filters.datePreset !== 'all'}
             value={filters.datePreset}
             onChange={(v) => update({ datePreset: v as DatePreset })}
-          >
-            <option value="all">{f.allTime}</option>
-            <option value="thisMonth">{f.thisMonth}</option>
-            <option value="lastMonth">{f.lastMonth}</option>
-            <option value="last3Months">{f.last3Months}</option>
-            <option value="custom">{f.custom}</option>
-          </FilterSelect>
+            items={[
+              { value: 'all', label: f.allTime },
+              { value: 'thisMonth', label: f.thisMonth },
+              { value: 'lastMonth', label: f.lastMonth },
+              { value: 'last3Months', label: f.last3Months },
+              { value: 'custom', label: f.custom },
+            ]}
+          />
 
           {filtered ? (
             <button type="button" onClick={clearFilters} className="h-9 shrink-0 rounded-full px-3 text-sm font-semibold text-accent-strong hover:bg-hover">

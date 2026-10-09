@@ -49,15 +49,9 @@ export function WelcomePage() {
           label={s.currencyLabel}
           hint={s.currencyHint}
           value={value}
-          onChange={(e) => setSelected(e.target.value)}
-          required
-        >
-          {currencies.data.map((currency) => (
-            <option key={currency.code} value={currency.code}>
-              {currency.code} · {currency.name}
-            </option>
-          ))}
-        </SelectField>
+          onChange={setSelected}
+          items={currencies.data.map((currency) => ({ value: currency.code, label: `${currency.code} · ${currency.name}` }))}
+        />
         <Button type="submit" size="lg" fullWidth loading={onboarding.isPending} disabled={!online}>
           {s.submit}
         </Button>

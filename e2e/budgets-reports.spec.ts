@@ -3,6 +3,7 @@ import { addMonths, formatMonth, formatMonthShort, monthOf, todayLocal } from '.
 import { strings } from '../src/strings/en';
 import { newAccount } from './support/account';
 import { addTransaction } from './support/transactions';
+import { pickFromList } from './support/select';
 
 // Base currency INR, locale en-US. Transactions are dated today, so "this month" is today's month.
 const thisMonth = monthOf(todayLocal());
@@ -30,7 +31,7 @@ test('budgets: set, warn at 80% and 100%, carry forward, show on Home', async ({
   // A category budget that is already at 85%: nearing the limit (icon + label, not just color).
   await page.getByRole('button', { name: strings.budgets.addCategory }).click();
   const categoryDialog = page.getByRole('dialog', { name: strings.budgets.editor.categoryTitle });
-  await categoryDialog.getByLabel(strings.budgets.editor.category).selectOption({ label: 'Food' });
+  await pickFromList(categoryDialog, strings.budgets.editor.category, 'Food');
   await categoryDialog.getByLabel(strings.budgets.editor.amount('INR')).fill('1000');
   await categoryDialog.getByRole('button', { name: strings.budgets.editor.save }).click();
   await expect(categoryDialog).toBeHidden();
