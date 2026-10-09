@@ -177,12 +177,16 @@
     linear-gradient(140deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
 }
 
-/* Thin, subtle scrollbars: a rounded handle on a transparent track (phones already use thin
-   overlay bars; this mostly replaces the wide grey bars on Windows). scrollbar-width isn't
-   inherited, so scroll areas opt in with this utility; html has it in the base layer. */
+/* Thin, subtle scrollbars: a rounded handle on a transparent track, replacing the wide grey bars
+   on Windows. Mouse and trackpad screens only: phones already draw thin overlay bars, and a
+   custom scrollbar color there can take the browser off its fastest scrollbar path.
+   scrollbar-width isn't inherited, so scroll areas opt in with this utility; html has it in the
+   base layer. */
 @utility scrollbar-subtle {
-  scrollbar-width: thin;
-  scrollbar-color: var(--scrollbar-thumb) transparent;
+  @media (pointer: fine) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
 }
 
 /* Rows you swipe sideways (filter chips): no scrollbar at all; touch, trackpads and Tab still scroll. */
@@ -217,8 +221,22 @@
     /* Always reserve the scrollbar's space, so locking scroll while a dialog is open (which
        hides the scrollbar) doesn't shift and re-lay-out the page. */
     scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  @media (pointer: fine) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
+  }
+
+  /* Phones: the keyboard shrinks the page (interactive-widget in index.html), so while a text
+     field has focus the bottom bar would ride on top of the keyboard; it steps aside instead. */
+  @media (pointer: coarse) {
+    body:has(:is(input:not([type='checkbox'], [type='radio'], [type='button'], [type='submit'], [type='file']), textarea):focus)
+      [data-bottom-nav] {
+      display: none;
+    }
   }
 
   body {

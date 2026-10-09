@@ -18,7 +18,7 @@ async function chooseOption(dialog: Locator, name: string) {
   await expect(dialog.getByRole('radio', { name, exact: true })).toBeChecked();
 }
 
-test('add, convert, edit and see it on Home', async ({ page }, testInfo) => {
+test('add, convert, edit and see it on Home', async ({ page, isMobile }, testInfo) => {
   await newAccount(page, testInfo, 'INR');
 
   // The friendly empty state guides the first action.
@@ -26,9 +26,10 @@ test('add, convert, edit and see it on Home', async ({ page }, testInfo) => {
   const dialog = addDialog(page);
   await expect(dialog).toBeVisible();
 
-  // The amount field is focused on open, with a decimal keypad.
+  // The amount field (decimal keypad) is focused on open where there's no on-screen keyboard to
+  // pop up; on phones the dialog takes focus and the keyboard opens when the field is tapped.
   const amount = dialog.getByLabel(strings.form.amount, { exact: true });
-  await expect(amount).toBeFocused();
+  await expect(isMobile ? dialog : amount).toBeFocused();
   await expect(amount).toHaveAttribute('inputmode', 'decimal');
 
   // Validation: nothing saves without an amount and a category.

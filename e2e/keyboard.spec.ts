@@ -2,11 +2,10 @@ import { expect, test, type Locator } from '@playwright/test';
 import { strings } from '../src/strings/en';
 import { newAccount } from './support/account';
 
-// Phones: the on-screen keyboard shrinks the visual viewport, not the page, so a bottom sheet
-// must rise above it (owner report, 2026-10-10). Playwright can't open a real keyboard, so the
-// visual viewport is simulated: what a keyboard does to it is shrink its height.
-type KeyboardWindow = Window & { setKeyboard: (height: number) => void };
-
+// Phones: with interactive-widget=resizes-content (index.html), Android's on-screen keyboard
+// shrinks the page, so a bottom sheet fixed to the page's bottom sits above it (owner reports,
+// 2026-10-10). Playwright can't open a real keyboard; shrinking the viewport is what the keyboard
+// does to the page under this setting.
 const KEYBOARD = 320;
 
 async function bottomOf(locator: Locator): Promise<number> {
@@ -14,38 +13,35 @@ async function bottomOf(locator: Locator): Promise<number> {
   return box ? Math.round(box.y + box.height) : Number.NaN;
 }
 
-test('bottom sheets rise above the on-screen keyboard and drop back when it closes', async ({ page, isMobile }, testInfo) => {
-  test.skip(!isMobile, 'Phones only: wide screens use a centered dialog.');
-  await page.addInitScript(() => {
-    const fake = Object.assign(new EventTarget(), {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      offsetTop: 0,
-      offsetLeft: 0,
-      pageTop: 0,
-      pageLeft: 0,
-      scale: 1,
-    });
-    Object.defineProperty(window, 'visualViewport', { configurable: true, get: () => fake });
-    (window as unknown as KeyboardWindow).setKeyboard = (height) => {
-      fake.height = window.innerHeight - height;
-      fake.dispatchEvent(new Event('resize'));
-    };
-  });
-
+test('phones: sheets sit above the keyboard; the bottom bar steps aside while typing', async ({ page, isMobile }, testInfo) => {
+  test.skip(!isMobile, 'Phones only: wide screens use a centered dialog and have no on-screen keyboard.');
   await newAccount(page, testInfo, 'INR');
+  const screen = page.viewportSize()!;
+  const nav = page.getByRole('navigation', { name: strings.nav.label });
+
+  // Opening a sheet doesn't pop the keyboard up: the dialog itself has focus.
   await page.getByRole('button', { name: strings.nav.addLong }).first().click();
   const dialog = page.getByRole('dialog', { name: strings.form.addTitle });
-  await expect(dialog).toBeVisible();
-  const screenHeight = page.viewportSize()!.height;
+  await expect(dialog).toBeFocused();
 
-  // Keyboard up: the sheet ends above it, still fits on screen, and the amount field is visible.
-  await page.evaluate((height) => (window as unknown as KeyboardWindow).setKeyboard(height), KEYBOARD);
-  await expect.poll(() => bottomOf(dialog)).toBeLessThanOrEqual(screenHeight - KEYBOARD + 1);
+  // Tapping the amount field brings the keyboard up: the page shrinks, and the sheet stays above it.
+  const amount = dialog.getByLabel(strings.form.amount, { exact: true });
+  await amount.click();
+  await page.setViewportSize({ width: screen.width, height: screen.height - KEYBOARD });
+  await expect.poll(() => bottomOf(dialog)).toBeLessThanOrEqual(screen.height - KEYBOARD);
   expect((await dialog.boundingBox())!.y).toBeGreaterThanOrEqual(0);
-  await expect.poll(() => bottomOf(dialog.getByLabel(strings.form.amount, { exact: true }))).toBeLessThanOrEqual(screenHeight - KEYBOARD);
+  expect(await bottomOf(amount)).toBeLessThanOrEqual(screen.height - KEYBOARD);
 
   // Keyboard down: back at the bottom of the screen.
-  await page.evaluate(() => (window as unknown as KeyboardWindow).setKeyboard(0));
-  await expect.poll(() => bottomOf(dialog)).toBeGreaterThanOrEqual(screenHeight - 1);
+  await page.setViewportSize(screen);
+  await expect.poll(() => bottomOf(dialog)).toBeGreaterThanOrEqual(screen.height - 1);
+  await page.keyboard.press('Escape');
+
+  // Typing in the page (search) hides the bottom bar; leaving the field brings it back.
+  await page.getByRole('link', { name: strings.nav.transactions }).first().click();
+  await expect(nav).toBeVisible();
+  await page.getByRole('searchbox', { name: strings.transactions.searchLabel }).click();
+  await expect(nav).toBeHidden();
+  await page.getByRole('heading', { name: strings.pages.transactions.title, level: 1 }).click();
+  await expect(nav).toBeVisible();
 });

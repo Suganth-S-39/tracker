@@ -35,6 +35,7 @@ the production site after deploying (docs/SETUP.md). Note anything that fails an
 - [ ] **First run:** sign up with a new address; the setup screen asks for your name (Get started without one shows "Enter your name."), an optional photo and the base currency.
 - [ ] **Photo from the phone:** Settings → **Add photo** offers the camera and the photo library (an iPhone HEIC photo works). The photo appears on Home; **Remove photo** brings back your initial.
 - [ ] **Savings and investments:** add one of each (Add → **Savings** / **Invest** tabs). Home's tiles show them, the balance drops by them, and Budgets don't count them.
+- [ ] **Keyboard (Android):** open Add: the sheet slides up without the keyboard. Tap Amount: the keyboard opens and the sheet sits right above it, with the field visible and no flicker. Tap the search on Transactions: the bottom bar steps aside while typing.
 - [ ] **Calendar:** Transactions → **Calendar**. Days show what was spent; tapping a day lists its transactions; the months change with the arrows. Comfortable to tap on your phone.
 
 ## Things that need a day to pass

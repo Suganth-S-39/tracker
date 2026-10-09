@@ -30,6 +30,7 @@ export function BottomNav({ onAdd, addDisabled }: { onAdd: () => void; addDisabl
   return (
     <nav
       aria-label={strings.nav.label}
+      data-bottom-nav
       className="glass-bar fixed inset-x-0 bottom-0 z-30 border-t border-glass-border pb-safe wide:hidden"
     >
       <ul className="mx-auto flex max-w-lg items-stretch">

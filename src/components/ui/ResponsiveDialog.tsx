@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { strings } from '@/strings/en';
 
 /**
@@ -25,57 +25,6 @@ function useScrollLock(locked: boolean) {
   }, [locked]);
 }
 
-/** Less than this much of the page hidden below the visible area is browser chrome, not a keyboard. */
-const KEYBOARD_MIN_PX = 80;
-/** Space kept between a lifted sheet and the top of the screen. */
-const LIFT_TOP_GAP_PX = 12;
-
-type KeyboardLift = { inset: number; visibleHeight: number };
-
-/**
- * Keeps a bottom sheet above the phone's on-screen keyboard (owner report, 2026-10-10: the sheet
- * stayed behind the keyboard). The keyboard shrinks only the visual viewport, not the page, so a
- * sheet fixed to the bottom of the page sits behind it, and with page scrolling locked the
- * browser can't bring the field into view. While the keyboard is up, the sheet is lifted by the
- * covered height (a translate, animated on the compositor) and capped to what's visible, and the
- * field being typed in is scrolled into view inside it. Pinch-zoom isn't mistaken for a keyboard.
- */
-function useKeyboardLift(open: boolean): KeyboardLift | null {
-  const [lift, setLift] = useState<KeyboardLift | null>(null);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!open || !viewport) return;
-    let frame = 0;
-    let wasUp = false;
-    const measure = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const inset = Math.round(window.innerHeight - viewport.height - viewport.offsetTop);
-        const up = Math.abs(viewport.scale - 1) < 0.01 && inset > KEYBOARD_MIN_PX;
-        setLift(up ? { inset, visibleHeight: Math.round(viewport.height) } : null);
-        if (up && !wasUp) {
-          // Once the sheet has moved, bring the field being typed in into view inside it.
-          requestAnimationFrame(() => {
-            const field = document.activeElement;
-            if (field instanceof HTMLElement && field.closest('[role="dialog"]')) field.scrollIntoView({ block: 'nearest' });
-          });
-        }
-        wasUp = up;
-      });
-    };
-    measure();
-    viewport.addEventListener('resize', measure);
-    viewport.addEventListener('scroll', measure);
-    return () => {
-      cancelAnimationFrame(frame);
-      viewport.removeEventListener('resize', measure);
-      viewport.removeEventListener('scroll', measure);
-      setLift(null);
-    };
-  }, [open]);
-  return open ? lift : null;
-}
-
 type ResponsiveDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -96,10 +45,12 @@ const TYPING_FIELD = 'input:not([type=button],[type=checkbox],[type=radio],[type
  * Focus the first element marked data-autofocus (e.g. the amount field) instead of the close
  * button, without scrolling (the dialog is still sliding in).
  *
- * On touch screens, focusing a text field opens the keyboard, and a keyboard opening during the
- * slide-in makes both animations stutter. There the dialog itself takes focus first (screen
- * readers announce it), and the field once the dialog has settled. Android then opens the
- * keyboard; iOS opens it when the field is tapped.
+ * On touch screens a text field isn't focused automatically: that would open the keyboard right
+ * as the sheet arrives, resizing the page under it (owner report, 2026-10-10: flicker while the
+ * sheet popped up). There the dialog itself takes focus (screen readers announce it), and the
+ * keyboard opens when the person taps a field. The page then shrinks above the keyboard
+ * (interactive-widget=resizes-content in index.html), so the sheet sits above it and the browser
+ * keeps the field in view: no script runs while the keyboard moves.
  *
  * Focus moves on the next frame rather than while the dialog mounts: focusing forces a style and
  * layout pass, which then runs a second time for the frame. Done in the frame, it runs once.
@@ -112,17 +63,8 @@ function focusMarkedElement(event: Event) {
 
   requestAnimationFrame(() => {
     if (!content.isConnected) return;
-    if (!target.matches(TYPING_FIELD) || !window.matchMedia('(pointer: coarse)').matches) {
-      target.focus({ preventScroll: true });
-      return;
-    }
-    content.focus({ preventScroll: true });
-    // Unless the person has already moved focus themselves.
-    const focusField = () => {
-      if (document.activeElement === content) target.focus({ preventScroll: true });
-    };
-    content.addEventListener('animationend', focusField, { once: true });
-    window.setTimeout(focusField, 400); // in case no animation runs
+    const touchTyping = target.matches(TYPING_FIELD) && window.matchMedia('(pointer: coarse)').matches;
+    (touchTyping ? content : target).focus({ preventScroll: true });
   });
 }
 
@@ -132,7 +74,6 @@ function focusMarkedElement(event: Event) {
  */
 export function ResponsiveDialog({ open, onOpenChange, title, description, children }: ResponsiveDialogProps) {
   useScrollLock(open);
-  const lift = useKeyboardLift(open);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -147,16 +88,10 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, child
         <Dialog.Content
           onOpenAutoFocus={focusMarkedElement}
           onEscapeKeyDown={ignoreEscapeForOpenSelect}
-          style={
-            lift
-              ? ({ '--keyboard-inset': `${lift.inset}px`, maxHeight: `${lift.visibleHeight - LIFT_TOP_GAP_PX}px` } as CSSProperties)
-              : undefined
-          }
           className={
             // Opaque surface (no blur) and clipped to its corners: see surface-sheet in index.css.
+            // Fixed to the bottom of the page, which on phones ends above the on-screen keyboard.
             'surface-sheet fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col overflow-hidden rounded-t-card pb-safe ' +
-            // Lifted above an on-screen keyboard (see useKeyboardLift); wide screens keep their centering.
-            'translate-y-[calc(var(--keyboard-inset,0px)*-1)] transition-[translate] duration-150 ease-out ' +
             'data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in ' +
             'wide:inset-x-auto wide:bottom-auto wide:left-1/2 wide:top-1/2 wide:w-[calc(100%-2rem)] wide:max-w-lg ' +
             'wide:-translate-x-1/2 wide:-translate-y-1/2 wide:rounded-card wide:pb-0 ' +

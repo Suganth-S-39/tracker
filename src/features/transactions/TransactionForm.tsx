@@ -23,6 +23,9 @@ import type { EditorKind } from './editor-context';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
 import { TRANSACTION_TYPES } from './kinds';
 
+/** How many recent payees the "Paid to" field suggests. */
+const PAYEE_SUGGESTIONS = 50;
+
 type Repeat = NonNullable<TransactionInput['repeat']> | 'none';
 const REPEAT_OPTIONS: readonly Repeat[] = ['none', 'daily', 'weekly', 'monthly', 'yearly'];
 
@@ -185,7 +188,8 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
               onChange={(e) => setPayee(e.target.value)}
             />
             <datalist id={payeeListId}>
-              {(payees.data ?? []).map((name) => (
+              {/* The most recent payees only: every option is built each time the form opens. */}
+              {(payees.data ?? []).slice(0, PAYEE_SUGGESTIONS).map((name) => (
                 <option key={name} value={name} />
               ))}
             </datalist>
