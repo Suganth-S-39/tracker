@@ -1,5 +1,5 @@
 import { Repeat, Trash2 } from 'lucide-react';
-import { useRef, useState, type PointerEvent } from 'react';
+import { memo, useRef, useState, type PointerEvent } from 'react';
 import { CategoryIcon } from '@/features/categories/CategoryIcon';
 import { categoryLabel, type Category } from '@/features/categories/api';
 import type { MoneyContext } from '@/features/money/useMoney';
@@ -12,10 +12,14 @@ type TransactionRowProps = {
   transaction: Transaction;
   category: Category | undefined;
   money: MoneyContext;
-  onOpen: () => void;
-  /** Omit to show the row without delete (e.g. on Home). */
-  onDelete?: (() => void) | undefined;
+  /** Pass a stable function (not a new closure per render) so unchanged rows skip re-rendering. */
+  onOpen: (transaction: Transaction) => void;
+  /** Omit to show the row without delete (e.g. on Home). Stable, like onOpen. */
+  onDelete?: ((transaction: Transaction) => void) | undefined;
 };
+
+/** Every row is this tall (`min-h-16`), so the virtualized list's estimates are exact. */
+export const TRANSACTION_ROW_HEIGHT = 64;
 
 const SWIPE_DELETE_FRACTION = 0.35;
 const DRAG_START_PX = 8;
@@ -23,8 +27,9 @@ const DRAG_START_PX = 8;
 /**
  * One transaction. Tap or click to edit. Phones: swipe left to delete. Wide screens: a delete
  * button on the row. Amounts carry a +/- sign so income and expense never rely on color alone.
+ * Memoized: while the list scrolls, only rows whose data changed re-render.
  */
-export function TransactionRow({ transaction, category, money, onOpen, onDelete }: TransactionRowProps) {
+export const TransactionRow = memo(function TransactionRow({ transaction, category, money, onOpen, onDelete }: TransactionRowProps) {
   const label = category ? categoryLabel(category) : '';
   const title = transaction.payee ?? label;
   const subtitle = [transaction.payee ? label : null, transaction.note].filter(Boolean).join(' · ');
@@ -37,7 +42,7 @@ export function TransactionRow({ transaction, category, money, onOpen, onDelete 
   const foreign = transaction.original_currency !== money.baseCurrency;
   const description = `${title}, ${amount}`;
 
-  const swipe = useSwipeToDelete(onDelete);
+  const swipe = useSwipeToDelete(onDelete ? () => onDelete(transaction) : undefined);
 
   return (
     <div className="group relative overflow-hidden rounded-control">
@@ -59,9 +64,9 @@ export function TransactionRow({ transaction, category, money, onOpen, onDelete 
       >
         <button
           type="button"
-          onClick={(e) => (swipe.consumeClick() ? e.preventDefault() : onOpen())}
+          onClick={(e) => (swipe.consumeClick() ? e.preventDefault() : onOpen(transaction))}
           aria-label={strings.transactions.openLabel(description)}
-          className="flex min-w-0 flex-1 items-center gap-3 rounded-control px-2 py-2.5 text-left hover:bg-hover"
+          className="flex min-h-16 min-w-0 flex-1 items-center gap-3 rounded-control px-2 py-2.5 text-left hover:bg-hover"
         >
           <CategoryIcon icon={category?.icon ?? 'tag'} tone={transaction.type} />
           <span className="min-w-0 flex-1">
@@ -97,7 +102,7 @@ export function TransactionRow({ transaction, category, money, onOpen, onDelete 
         {onDelete ? (
           <button
             type="button"
-            onClick={onDelete}
+            onClick={() => onDelete(transaction)}
             aria-label={strings.transactions.deleteLabel(description)}
             className="hidden size-10 shrink-0 place-items-center rounded-full text-fg-muted opacity-60 group-hover:opacity-100 hover:bg-hover hover:text-expense-strong focus-visible:opacity-100 wide:grid"
           >
@@ -107,7 +112,7 @@ export function TransactionRow({ transaction, category, money, onOpen, onDelete 
       </div>
     </div>
   );
-}
+});
 
 /** Horizontal swipe to the left past a threshold deletes; vertical movement scrolls as usual. */
 function useSwipeToDelete(onDelete: (() => void) | undefined) {

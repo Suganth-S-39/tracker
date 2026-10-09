@@ -28,11 +28,18 @@ test('settings: name, password reset email, privacy policy, delete account', asy
   await expect(page.getByText(s.passwordEmailSent(email))).toBeVisible();
   expect(await latestAuthLink(email)).toContain('type=recovery');
 
-  // Privacy policy
+  // Privacy policy, and its own Back button (the installed app has no browser back button).
   await page.getByRole('link', { name: s.privacy }).click();
   await expect(page.getByRole('heading', { name: strings.pages.privacy.title, level: 1 })).toBeVisible();
   await expect(page.getByRole('heading', { name: strings.privacy.sections[0].title, level: 2 })).toBeVisible();
-  await page.goBack();
+  await page.getByRole('button', { name: strings.common.back }).click();
+  await expect(page.getByRole('heading', { name: strings.pages.settings.title, level: 1 })).toBeVisible();
+
+  // Opened directly (no in-app history), Back goes to the start screen.
+  await page.goto('/privacy');
+  await page.getByRole('button', { name: strings.common.back }).click();
+  await expect(page.getByRole('heading', { name: strings.pages.home.title, level: 1 })).toBeAttached();
+  await page.goto('/settings');
 
   // Delete account: guarded by typing the confirmation word.
   await page.getByRole('button', { name: s.deleteAccount.button }).click();

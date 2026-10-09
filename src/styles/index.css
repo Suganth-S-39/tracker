@@ -101,10 +101,22 @@
 }
 
 /*
- * Liquid glass. Translucent, blurred panels with a bright top edge. Blur is kept moderate and
- * used only on a few large surfaces (cards, bars, dialogs) so mid-range phones stay smooth.
+ * Liquid glass: translucent panels with a bright top edge.
+ *
+ * A backdrop blur is redrawn on every frame for every visible element that has one while the page
+ * scrolls, and with blurred cards that cost dropped frames on integrated GPUs and 90 Hz phones.
+ * Cards (`glass`) only ever sit on the ambient wash, which is already soft, so a blur there looks
+ * the same as none: they don't blur. Real blur is kept for surfaces content moves behind:
+ * navigation bars (`glass-bar`), floating sticky panels (`glass-float`) and dialogs (`glass-strong`).
  */
 @utility glass {
+  background-color: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-card);
+}
+
+/* A card that stays put while content scrolls underneath (sticky filters). */
+@utility glass-float {
   background-color: var(--glass);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   backdrop-filter: blur(20px) saturate(180%);
@@ -126,6 +138,11 @@
   background-color: var(--glass-strong);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
   backdrop-filter: blur(28px) saturate(180%);
+}
+
+/* The desktop sidebar: same tint as the bars, no blur (nothing ever scrolls behind it). */
+@utility glass-rail {
+  background-color: var(--glass-strong);
 }
 
 /* The hero balance card: a deep gradient "card" with a soft specular sheen. */
@@ -156,11 +173,15 @@
   }
 
   /* Soft ambient color behind the glass. A fixed layer (not background-attachment: fixed,
-     which repaints on scroll on phones). */
+     which repaints on scroll on phones), as tall as the large viewport so it never resizes and
+     repaints when a phone browser's toolbar hides or shows during scrolling. */
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 100lvh;
     z-index: -1;
     pointer-events: none;
     background:

@@ -89,7 +89,7 @@ export function TransactionsPage() {
       <PageHeader title={strings.pages.transactions.title} />
 
       {/* A floating frosted panel that stays put while the list scrolls under it. */}
-      <div className="glass sticky top-[calc(env(safe-area-inset-top)+0.5rem)] z-20 mt-2 rounded-card p-3">
+      <div className="glass-float sticky top-[calc(env(safe-area-inset-top)+0.5rem)] z-20 mt-2 rounded-card p-3">
         <div className="relative">
           <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-fg-muted" />
           <input

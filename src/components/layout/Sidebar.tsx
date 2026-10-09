@@ -33,7 +33,7 @@ function SidebarLink({ item }: { item: NavItem }) {
  */
 export function Sidebar({ onAdd, addDisabled }: { onAdd: () => void; addDisabled: boolean }) {
   return (
-    <aside className="glass-bar fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-glass-border px-4 py-5 wide:flex">
+    <aside className="glass-rail fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-glass-border px-4 py-5 wide:flex">
       <div className="mb-6 px-2">
         <BrandMark />
       </div>

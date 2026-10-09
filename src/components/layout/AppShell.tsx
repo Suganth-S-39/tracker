@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Outlet } from 'react-router';
+import { preloadMainRoutes } from '@/app/preloadRoutes';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { useTimezoneSync } from '@/features/profile/useTimezoneSync';
 import { MonthProvider } from '@/features/month/MonthProvider';
@@ -16,6 +18,7 @@ function ShellLayout() {
   const online = useOnlineStatus();
   const editor = useTransactionEditor();
   useTimezoneSync();
+  useEffect(preloadMainRoutes, []);
 
   return (
     <div className="min-h-dvh">

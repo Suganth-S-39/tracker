@@ -31,7 +31,8 @@ Owner's manual test checklist (real phones, real email): [docs/MANUAL_TESTS.md](
 
 ## Project conventions
 
-- **Look**: Apple-inspired with liquid glass (owner redesign, see DECISIONS.md). Panels use the `glass` utility (`Card` does this); dialogs and bars use `glass-strong` / `glass-bar`. Don't add backdrop blur to small or repeated elements (list rows): it's expensive on phones. Buttons and segmented controls are pills.
+- **Look**: Apple-inspired with liquid glass (owner redesign, see DECISIONS.md). Cards use `glass` (`Card` does this): translucent, **no blur**. Backdrop blur is redrawn every scroll frame, so it's only on surfaces content moves behind: `glass-bar` (bottom bar), `glass-float` (sticky panels), `glass-strong` (dialogs, sheets, prompts). The sidebar uses `glass-rail` (no blur). Never add blur to cards, list rows or anything else that scrolls with the page. Buttons and segmented controls are pills.
+- **Smooth scrolling (target: 90 Hz phones, integrated-GPU laptops)**: list rows are memoized with stable handlers; virtualized lists use exact size estimates and `useFlushSync: false`. Keep it that way when touching lists.
 - **Colors**: only in `src/styles/tokens.css`. Tailwind's default palette is removed; use the token utilities (`bg-surface`, `text-fg`, `text-fg-muted`, `bg-accent-strong text-on-accent`, `text-expense-strong`, `bg-control`, ...). Use `-strong` variants for text and filled buttons; plain `income` / `expense` / `accent` for icons, bars and charts. `tokens.test.ts` checks WCAG contrast (including text on glass); `noHardcodedColors.test.ts` fails on color literals in `src/`. No purple or dark-blue accents.
 - **Income/expense always pair color with a non-color cue** (arrow icon or +/- sign).
 - **Strings**: all user-facing copy is in `src/strings/en.ts`. ESLint rejects JSX text and literal `aria-label`/`placeholder`/`title`/`alt`.

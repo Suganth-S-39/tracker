@@ -65,7 +65,7 @@ export function RecentTransactions({ month, money }: { month: MonthKey; money: M
             transaction={transaction}
             category={categories.get(transaction.category_id)}
             money={money}
-            onOpen={() => editor.openEdit(transaction)}
+            onOpen={editor.openEdit}
           />
         ))}
       </div>

@@ -1,8 +1,30 @@
-import { Link } from 'react-router';
+import { ChevronLeft } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router';
 import { BrandMark } from '@/components/layout/BrandMark';
 import { Card } from '@/components/ui/Card';
 import { usePageTitle } from '@/lib/usePageTitle';
 import { strings } from '@/strings/en';
+
+/**
+ * Back, for the installed app (which has no browser back button). Opened from inside the app, it
+ * returns to where the person was; opened directly, it goes to the start screen (Home, or Sign in
+ * when signed out).
+ */
+function BackButton() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const goBack = () => void (location.key === 'default' ? navigate('/') : navigate(-1));
+  return (
+    <button
+      type="button"
+      onClick={goBack}
+      className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 text-sm font-semibold text-fg-muted hover:text-fg"
+    >
+      <ChevronLeft aria-hidden="true" className="size-4" />
+      {strings.common.back}
+    </button>
+  );
+}
 
 /** Public, plain-language privacy policy (spec section 10). */
 export function PrivacyPage() {
@@ -10,9 +32,10 @@ export function PrivacyPage() {
   const p = strings.privacy;
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-10 pt-safe">
-      <Link to="/" className="mb-8 self-start">
+      <div className="mb-8 flex items-center justify-between gap-4">
+        <BackButton />
         <BrandMark />
-      </Link>
+      </div>
       <main>
         <Card className="p-6 wide:p-10">
           <h1 className="text-[2rem] leading-tight font-bold">{strings.pages.privacy.title}</h1>
