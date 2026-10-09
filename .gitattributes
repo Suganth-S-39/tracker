@@ -1,0 +1,3 @@
+# LF everywhere, including Windows checkouts. The Content-Security-Policy in vercel.json pins the
+# inline script in index.html by hash, and a CRLF checkout would change that hash.
+* text=auto eol=lf

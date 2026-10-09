@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-accent="graphite">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Tracker</title>
+    <meta name="description" content="Track income, expenses, budgets and IOUs." />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/icon.svg" sizes="any" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <meta name="theme-color" content="#F5F5F7" />
+    <!--
+      Applies the saved theme before first paint so there is no flash of the wrong theme.
+      Keep the storage keys and defaults in sync with src/theme/storage.ts.
+    -->
+    <script>
+      (function () {
+        try {
+          var root = document.documentElement;
+          var mode = localStorage.getItem('tracker.theme-mode') || 'system';
+          var accent = localStorage.getItem('tracker.accent-theme') || 'graphite';
+          var dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          root.setAttribute('data-theme', dark ? 'dark' : 'light');
+          root.setAttribute('data-accent', accent);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

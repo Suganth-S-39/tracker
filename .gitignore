@@ -1,0 +1,22 @@
+node_modules/
+dist/
+dev-dist/
+*.tsbuildinfo
+*.log
+
+# Local env files hold keys; only .env.example is committed.
+.env
+.env.local
+.env.*.local
+
+# Test output
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

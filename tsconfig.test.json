@@ -1,0 +1,10 @@
+{
+  // Unit tests run in Node (Vitest), so they also get Node's types.
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    "types": ["vite/client", "vite-plugin-pwa/react", "node"]
+  },
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/vite-env.d.ts"],
+  "exclude": []
+}

@@ -1,0 +1,200 @@
+@import 'tailwindcss';
+@import './tokens.css';
+
+/*
+ * Tailwind theme. The default color palette is removed on purpose: only the semantic tokens
+ * below exist, so a hardcoded color like `bg-red-500` cannot compile.
+ */
+@theme {
+  --color-*: initial;
+
+  /*
+   * The single layout breakpoint (open item 13): below it, phone layout (bottom bar, bottom
+   * sheet); at or above it, wide layout (sidebar, centered dialog). Use only the `wide:` variant
+   * for layout switches.
+   */
+  --breakpoint-*: initial;
+  --breakpoint-wide: 48rem;
+
+  /*
+   * Typography (owner redesign): Apple's San Francisco where it's built in (no download), and
+   * Geist, the closest open typeface, everywhere else.
+   */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Geist Variable', 'Segoe UI', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Geist Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --radius-card: 1.75rem;
+  --radius-control: 0.875rem;
+
+  --animate-sheet-in: sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-sheet-out: sheet-out 180ms ease-in;
+  --animate-dialog-in: dialog-in 220ms cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-dialog-out: dialog-out 140ms ease-in;
+  --animate-fade-in: fade-in 200ms ease-out;
+  --animate-fade-out: fade-out 140ms ease-in;
+
+  @keyframes sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  @keyframes sheet-out {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+  }
+  /* Centering uses the separate `translate` property (Tailwind v4), so these only nudge and scale. */
+  @keyframes dialog-in {
+    from { opacity: 0; transform: translateY(0.5rem) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes dialog-out {
+    from { opacity: 1; transform: none; }
+    to { opacity: 0; transform: translateY(0.5rem) scale(0.97); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+}
+
+/* Utilities read the CSS variables at use time, so theme switches need no re-render. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-divider: var(--divider);
+  --color-control: var(--control);
+  --color-control-border: var(--control-border);
+  --color-hover: var(--hover);
+  --color-scrim: var(--scrim);
+  --color-glass-border: var(--glass-border);
+
+  --color-income: var(--income);
+  --color-income-strong: var(--income-strong);
+  --color-income-tint: var(--income-tint);
+  --color-expense: var(--expense);
+  --color-expense-strong: var(--expense-strong);
+  --color-expense-tint: var(--expense-tint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-tint: var(--accent-tint);
+  --color-on-accent: var(--on-accent);
+  --color-on-hero: var(--on-hero);
+  --color-hero-tile: var(--hero-tile);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-6: var(--chart-6);
+  --color-chart-7: var(--chart-7);
+  --color-chart-other: var(--chart-other);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-raised: var(--shadow-raised);
+}
+
+/*
+ * Liquid glass. Translucent, blurred panels with a bright top edge. Blur is kept moderate and
+ * used only on a few large surfaces (cards, bars, dialogs) so mid-range phones stay smooth.
+ */
+@utility glass {
+  background-color: var(--glass);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-card);
+}
+
+/* Denser glass for dialogs, sheets and navigation bars, where long text sits on top. */
+@utility glass-strong {
+  background-color: var(--glass-strong);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-raised);
+}
+
+/* Navigation bars: dense glass without the floating shadow. */
+@utility glass-bar {
+  background-color: var(--glass-strong);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
+}
+
+/* The hero balance card: a deep gradient "card" with a soft specular sheen. */
+@utility bg-hero {
+  background-image:
+    radial-gradient(120% 90% at 0% 0%, var(--hero-sheen), transparent 55%),
+    linear-gradient(140deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
+}
+
+/* Safe areas for notched phones, including when installed (viewport-fit=cover in index.html). */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-fg antialiased;
+    min-height: 100dvh;
+    letter-spacing: -0.011em;
+  }
+
+  /* Soft ambient color behind the glass. A fixed layer (not background-attachment: fixed,
+     which repaints on scroll on phones). */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(44rem 34rem at 0% 0%, var(--mesh-1), transparent 70%),
+      radial-gradient(40rem 34rem at 100% 12%, var(--mesh-2), transparent 70%),
+      radial-gradient(52rem 38rem at 55% 105%, var(--mesh-3), transparent 70%);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.022em;
+  }
+
+  /* Amounts line up in columns. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* One visible focus style everywhere (WCAG 2.4.7). */
+  :focus-visible {
+    outline: 2px solid var(--accent-strong);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

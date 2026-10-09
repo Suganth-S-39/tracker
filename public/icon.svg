@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Placeholder app icon (open item 9): income and expense arrows on a graphite card. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#48484A"/>
+      <stop offset="0.55" stop-color="#1D1D1F"/>
+      <stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <radialGradient id="sheen" cx="0" cy="0" r="1" gradientTransform="translate(60 40) scale(420 320)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#g)"/>
+  <rect width="512" height="512" rx="112" fill="url(#sheen)"/>
+  <g fill="none" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M196 364V152M136 212l60-60 60 60" stroke="#30D158"/>
+    <path d="M316 148v212M256 300l60 60 60-60" stroke="#FF6961"/>
+  </g>
+</svg>

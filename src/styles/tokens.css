@@ -1,0 +1,224 @@
+/*
+ * Design tokens. This is the ONLY file that may contain color values.
+ * Components use the Tailwind utilities mapped in index.css (glass, bg-surface, text-fg,
+ * bg-accent-strong ...).
+ *
+ * Look (owner redesign, 2026-10-09; DECISIONS.md): Apple-inspired. Apple's neutral grays,
+ * San Francisco / Geist type, and "liquid glass" panels: translucent, blurred surfaces with a
+ * bright top edge, over a soft ambient color wash. No purple or dark blue.
+ *
+ * Attributes on <html>, set before first paint by the inline script in index.html:
+ *   data-theme  = "light" | "dark"   (system mode is resolved to one of these)
+ *   data-accent = "graphite" | "green" | "teal" | "gold" | "rose"
+ *
+ * "-strong" variants are the AA-safe shades for text and filled buttons; the plain colors are
+ * for icons, bars and charts. src/styles/tokens.test.ts checks every pairing, including text on
+ * the translucent glass over each part of the ambient background.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Neutrals (Apple light) */
+  --bg: #F5F5F7;
+  --surface: #FFFFFF;
+  --text: #1D1D1F;
+  --text-muted: #606065;
+  --divider: #D2D2D7;
+  /* Borders that identify a control (inputs) need 3:1 against what is behind them. */
+  --control-border: #7C7C81;
+  /* Apple-style translucent fill for segmented controls and secondary buttons. */
+  --control: rgb(118 118 128 / 0.12);
+
+  /* Glass. Panels are translucent white with a bright top edge and a hairline for definition. */
+  --glass: rgb(255 255 255 / 0.68);
+  --glass-strong: rgb(255 255 255 / 0.86);
+  --glass-border: rgb(255 255 255 / 0.7);
+  --glass-edge: rgb(29 29 31 / 0.07);
+  --glass-highlight: rgb(255 255 255 / 0.9);
+
+  /* Ambient color wash behind the glass (kept soft so text contrast holds everywhere). */
+  --mesh-1: rgb(255 214 170 / 0.38);
+  --mesh-2: rgb(170 228 208 / 0.38);
+  --mesh-3: rgb(255 196 208 / 0.3);
+
+  /* Income / expense: never change with the accent theme (Apple green and red) */
+  --income: #248A3D;
+  --income-strong: #1A7130;
+  --expense: #E5372D;
+  --expense-strong: #C7251C;
+
+  /* Text on accent fills, and on the hero card */
+  --on-accent: #FFFFFF;
+  --on-hero: #FFFFFF;
+  --hero-tile: rgb(255 255 255 / 0.12);
+  --hero-sheen: rgb(255 255 255 / 0.18);
+
+  /* Category chart palette (open item 5): fixed, independent of the accent, distinct from
+     income green and expense red. Assigned by rank; --chart-other is the "Other" slice. */
+  --chart-1: #0F766E;
+  --chart-2: #B45309;
+  --chart-3: #0E7490;
+  --chart-4: #BE185D;
+  --chart-5: #8B5E3C;
+  --chart-6: #475569;
+  --chart-7: #857008;
+  --chart-other: #7C7C81;
+
+  /* Overlays and elevation */
+  --scrim: rgb(0 0 0 / 0.28);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 10px 30px rgb(0 0 0 / 0.06);
+  --shadow-raised: 0 20px 60px rgb(0 0 0 / 0.18);
+
+  /* Derived tints (summary tiles, selected chips, hover states) */
+  --income-tint: color-mix(in oklab, var(--income) 12%, var(--surface));
+  --expense-tint: color-mix(in oklab, var(--expense) 11%, var(--surface));
+  --accent-tint: color-mix(in oklab, var(--accent) 10%, var(--surface));
+  --hover: color-mix(in oklab, var(--text) 5%, transparent);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* Neutrals (Apple dark) */
+  --bg: #000000;
+  --surface: #1C1C1E;
+  --text: #F5F5F7;
+  --text-muted: #A1A1A6;
+  --divider: #38383A;
+  --control-border: #76767B;
+  --control: rgb(118 118 128 / 0.24);
+
+  --glass: rgb(44 44 46 / 0.55);
+  --glass-strong: rgb(28 28 30 / 0.88);
+  --glass-border: rgb(255 255 255 / 0.1);
+  --glass-edge: rgb(0 0 0 / 0.5);
+  --glass-highlight: rgb(255 255 255 / 0.08);
+
+  --mesh-1: rgb(48 209 88 / 0.12);
+  --mesh-2: rgb(255 159 10 / 0.1);
+  --mesh-3: rgb(64 200 224 / 0.1);
+
+  --income: #30D158;
+  --income-strong: #30D158;
+  --expense: #FF453A;
+  --expense-strong: #FF6961;
+
+  --on-accent: #000000;
+
+  --chart-1: #5EEAD4;
+  --chart-2: #FBBF24;
+  --chart-3: #67E8F9;
+  --chart-4: #F472B6;
+  --chart-5: #D4A373;
+  --chart-6: #CBD5E1;
+  --chart-7: #FDE047;
+  --chart-other: #8E8E93;
+
+  --scrim: rgb(0 0 0 / 0.55);
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-raised: 0 20px 60px rgb(0 0 0 / 0.6);
+
+  --income-tint: color-mix(in oklab, var(--income) 16%, var(--surface));
+  --expense-tint: color-mix(in oklab, var(--expense) 16%, var(--surface));
+  --accent-tint: color-mix(in oklab, var(--accent) 16%, var(--surface));
+  --hover: color-mix(in oklab, var(--text) 8%, transparent);
+}
+
+/* Users who ask the OS for less transparency get solid panels. */
+@media (prefers-reduced-transparency: reduce) {
+  :root,
+  :root[data-theme='dark'] {
+    --glass: var(--surface);
+    --glass-strong: var(--surface);
+  }
+}
+
+/*
+ * Accent themes. Plain attribute selectors (not :root-only), so any element can preview an
+ * accent by setting data-accent (the swatches in Settings do). The hero card is a deep,
+ * premium "card" in every accent (dark in both themes, white text).
+ */
+
+/* ---------- Light ---------- */
+
+[data-accent='graphite'] {
+  --accent: #1D1D1F;
+  --accent-strong: #1D1D1F;
+  --hero-from: #3A3A3C;
+  --hero-via: #1D1D1F;
+  --hero-to: #000000;
+}
+
+[data-accent='green'] {
+  --accent: #248A3D;
+  --accent-strong: #1A7130;
+  --hero-from: #1E5C33;
+  --hero-via: #10391F;
+  --hero-to: #06160C;
+}
+
+[data-accent='teal'] {
+  --accent: #1C8DA3;
+  --accent-strong: #0E7385;
+  --hero-from: #115A68;
+  --hero-via: #0A3A44;
+  --hero-to: #04171C;
+}
+
+[data-accent='gold'] {
+  --accent: #A67C24;
+  --accent-strong: #7E5D12;
+  --hero-from: #6B5220;
+  --hero-via: #3D2E10;
+  --hero-to: #171107;
+}
+
+[data-accent='rose'] {
+  --accent: #C64A7C;
+  --accent-strong: #AE3768;
+  --hero-from: #7A2A4E;
+  --hero-via: #4A1630;
+  --hero-to: #1C0811;
+}
+
+/* ---------- Dark (text on accent fills is black) ---------- */
+
+[data-theme='dark'][data-accent='graphite'],
+[data-theme='dark'] [data-accent='graphite'] {
+  --accent: #F5F5F7;
+  --accent-strong: #F5F5F7;
+  --on-accent: #000000;
+  /* A black card would vanish on a black page; lift it to graphite. */
+  --hero-from: #48484A;
+  --hero-via: #2C2C2E;
+  --hero-to: #161617;
+}
+
+[data-theme='dark'][data-accent='green'],
+[data-theme='dark'] [data-accent='green'] {
+  --accent: #30D158;
+  --accent-strong: #30D158;
+  --on-accent: #000000;
+}
+
+[data-theme='dark'][data-accent='teal'],
+[data-theme='dark'] [data-accent='teal'] {
+  --accent: #40C8E0;
+  --accent-strong: #40C8E0;
+  --on-accent: #000000;
+}
+
+[data-theme='dark'][data-accent='gold'],
+[data-theme='dark'] [data-accent='gold'] {
+  --accent: #E8C26E;
+  --accent-strong: #E8C26E;
+  --on-accent: #000000;
+}
+
+[data-theme='dark'][data-accent='rose'],
+[data-theme='dark'] [data-accent='rose'] {
+  --accent: #FF7AA8;
+  --accent-strong: #FF7AA8;
+  --on-accent: #000000;
+}
