@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/queryClient';
 import { supabase, type Enums, type Tables } from '@/lib/supabase';
+import type { TransactionType } from '@/features/transactions/kinds';
 
 export type RecurringRule = Tables<'recurring_rules'>;
 export type Frequency = Enums<'recurrence_frequency'>;
@@ -31,7 +32,7 @@ function useInvalidate() {
 }
 
 export type RuleInput = {
-  type: 'expense' | 'income';
+  type: TransactionType;
   categoryId: string;
   amountMinor: number;
   currency: string;

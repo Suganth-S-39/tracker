@@ -1,7 +1,8 @@
 import { createContext, useContext } from 'react';
 import type { Transaction } from './api';
+import type { TransactionType } from './kinds';
 
-export type EditorKind = 'expense' | 'income' | 'iou';
+export type EditorKind = TransactionType | 'iou';
 
 export type TransactionEditor = {
   /** Opens the Add form, optionally on a given tab (the IOU page opens it on IOU). */

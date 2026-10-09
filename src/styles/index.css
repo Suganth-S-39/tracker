@@ -85,6 +85,12 @@
   --color-expense: var(--expense);
   --color-expense-strong: var(--expense-strong);
   --color-expense-tint: var(--expense-tint);
+  --color-savings: var(--savings);
+  --color-savings-strong: var(--savings-strong);
+  --color-savings-tint: var(--savings-tint);
+  --color-investment: var(--investment);
+  --color-investment-strong: var(--investment-strong);
+  --color-investment-tint: var(--investment-tint);
 
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
@@ -171,6 +177,31 @@
     linear-gradient(140deg, var(--hero-from) 0%, var(--hero-via) 55%, var(--hero-to) 100%);
 }
 
+/* Thin, subtle scrollbars: a rounded handle on a transparent track (phones already use thin
+   overlay bars; this mostly replaces the wide grey bars on Windows). scrollbar-width isn't
+   inherited, so scroll areas opt in with this utility; html has it in the base layer. */
+@utility scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+/* Rows you swipe sideways (filter chips): no scrollbar at all; touch, trackpads and Tab still scroll. */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Room above each page's content: clear of the notch or status bar, plus breathing space (more on
+   wide screens). The one place page-top spacing is set. */
+@utility pt-page {
+  padding-top: calc(env(safe-area-inset-top) + 1.25rem);
+  @variant wide {
+    padding-top: calc(env(safe-area-inset-top) + 2.5rem);
+  }
+}
+
 /* Safe areas for notched phones, including when installed (viewport-fit=cover in index.html). */
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
@@ -186,6 +217,8 @@
     /* Always reserve the scrollbar's space, so locking scroll while a dialog is open (which
        hides the scrollbar) doesn't shift and re-lay-out the page. */
     scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 
   body {

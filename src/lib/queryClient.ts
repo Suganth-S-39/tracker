@@ -40,6 +40,7 @@ export const queryKeys = {
     recent: (month: string) => ['tx', 'recent', month] as const,
     any: ['tx', 'any'] as const,
     summary: (month: string) => ['tx', 'summary', month] as const,
+    daily: (month: string) => ['tx', 'daily', month] as const,
     payees: ['tx', 'payees'] as const,
     // Budget usage and reports are derived from transactions too.
     budgets: (month: string) => ['tx', 'budgets', month] as const,

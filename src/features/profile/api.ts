@@ -18,7 +18,7 @@ export function useProfile() {
   });
 }
 
-type ProfileUpdate = Partial<Pick<Profile, 'display_name' | 'timezone' | 'accent_theme' | 'theme_mode'>>;
+type ProfileUpdate = Partial<Pick<Profile, 'display_name' | 'timezone' | 'accent_theme' | 'theme_mode' | 'avatar_data_url'>>;
 
 export function useUpdateProfile() {
   const userId = useUserId();
@@ -42,10 +42,13 @@ export function useCompleteOnboarding() {
   const userId = useUserId();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { baseCurrency: string; timezone: string }): Promise<Profile> => {
+    mutationFn: async (input: { baseCurrency: string; timezone: string; displayName: string; avatarDataUrl: string | null }): Promise<Profile> => {
+      // One call: base currency, name, optional photo and the starter categories, all or nothing.
       const { data, error } = await supabase.rpc('complete_onboarding', {
         p_base_currency: input.baseCurrency,
         p_timezone: input.timezone,
+        p_display_name: input.displayName,
+        ...(input.avatarDataUrl ? { p_avatar_data_url: input.avatarDataUrl } : {}),
       });
       if (error) throw error;
       return data;

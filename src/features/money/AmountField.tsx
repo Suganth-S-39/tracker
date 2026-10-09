@@ -1,5 +1,6 @@
 import { useId, useMemo } from 'react';
 import { Select } from '@/components/ui/Select';
+import { AMOUNT_TEXT, type TransactionType } from '@/features/transactions/kinds';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import type { MoneyContext } from './useMoney';
@@ -12,8 +13,8 @@ type AmountFieldProps = {
   onCurrencyChange: (code: string) => void;
   money: MoneyContext;
   error?: string | undefined;
-  /** Colors the amount: green for money in, red for money out (sign shown elsewhere). */
-  tone?: 'income' | 'expense' | 'neutral';
+  /** Colors the amount by kind (the sign and kind are shown elsewhere too). */
+  tone?: TransactionType | 'neutral';
   currencyLocked?: boolean;
   autoFocus?: boolean;
 };
@@ -58,7 +59,7 @@ export function AmountField({
             className={cx(
               'mt-1.5 block h-16 w-full rounded-control border border-control-border bg-surface px-4 text-3xl font-bold tabular',
               'aria-invalid:border-expense-strong',
-              tone === 'expense' ? 'text-expense-strong' : tone === 'income' ? 'text-income-strong' : 'text-fg',
+              tone === 'neutral' ? 'text-fg' : AMOUNT_TEXT[tone],
             )}
           />
         </div>

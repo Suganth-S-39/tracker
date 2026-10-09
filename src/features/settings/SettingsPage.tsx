@@ -1,5 +1,5 @@
 import { Check, ChevronRight, Download, LogOut, Trash2 } from 'lucide-react';
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Alert } from '@/components/ui/Alert';
@@ -10,6 +10,8 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { useToast } from '@/components/ui/toast-context';
 import { redirectUrls } from '@/features/auth/authRedirects';
 import { useProfile, useUpdateProfile } from '@/features/profile/api';
+import { Avatar } from '@/features/profile/Avatar';
+import { avatarFromFile } from '@/features/profile/avatarImage';
 import { cx } from '@/lib/cx';
 import { errorMessage } from '@/lib/errors';
 import { useOnlineStatus } from '@/lib/hooks';
@@ -75,7 +77,10 @@ function AccountSection() {
   const online = useOnlineStatus();
   const [name, setName] = useState<string | null>(null);
   const [resetState, setResetState] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
+  const [photoState, setPhotoState] = useState<{ busy: boolean; error: unknown }>({ busy: false, error: null });
+  const photoInput = useRef<HTMLInputElement>(null);
   const email = profile.data?.email ?? '';
+  const hasPhoto = Boolean(profile.data?.avatar_data_url);
   const nameValue = name ?? profile.data?.display_name ?? '';
 
   function saveName(event: FormEvent) {
@@ -91,6 +96,27 @@ function AccountSection() {
     );
   }
 
+  async function choosePhoto(file: File | undefined) {
+    if (!file) return;
+    setPhotoState({ busy: true, error: null });
+    try {
+      const photo = await avatarFromFile(file);
+      updateProfile.mutate(
+        { avatar_data_url: photo },
+        {
+          onSuccess: () => toast({ message: s.photo.saved }),
+          onSettled: () => setPhotoState((state) => ({ ...state, busy: false })),
+        },
+      );
+    } catch (error) {
+      setPhotoState({ busy: false, error });
+    }
+  }
+
+  function removePhoto() {
+    updateProfile.mutate({ avatar_data_url: null }, { onSuccess: () => toast({ message: s.photo.removed }) });
+  }
+
   async function sendPasswordReset() {
     setResetState('sending');
     const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: redirectUrls.passwordReset() });
@@ -100,6 +126,38 @@ function AccountSection() {
   return (
     <Card className="p-5">
       <h2 className="text-lg font-bold">{s.account}</h2>
+      <div className="mt-4 flex items-center gap-4">
+        <Avatar profile={profile.data} size="lg" />
+        <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" loading={photoState.busy} disabled={!online} onClick={() => photoInput.current?.click()}>
+            {hasPhoto ? s.photo.change : s.photo.add}
+          </Button>
+          {hasPhoto ? (
+            <Button variant="ghost" disabled={!online || photoState.busy} onClick={removePhoto}>
+              {s.photo.remove}
+            </Button>
+          ) : null}
+        </div>
+        {/* Opened by the button above (phones offer the camera or the photo library). */}
+        <input
+          ref={photoInput}
+          type="file"
+          accept="image/*"
+          tabIndex={-1}
+          aria-hidden="true"
+          className="sr-only"
+          onChange={(event) => {
+            void choosePhoto(event.target.files?.[0]);
+            event.target.value = '';
+          }}
+        />
+      </div>
+      <p className="mt-2 text-sm text-fg-muted">{s.photo.hint}</p>
+      {photoState.error ? (
+        <Alert tone="error" className="mt-2">
+          {errorMessage(photoState.error)}
+        </Alert>
+      ) : null}
       <form onSubmit={saveName} className="mt-4 flex items-end gap-2">
         <div className="flex-1">
           <TextField label={s.displayName} hint={s.displayNameHint} maxLength={80} value={nameValue} onChange={(e) => setName(e.target.value)} />

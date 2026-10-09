@@ -7,6 +7,7 @@ import { formatMoney, formatSignedMoney } from '@/domain/money';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import type { Transaction } from './api';
+import { AMOUNT_TEXT } from './kinds';
 
 type TransactionRowProps = {
   transaction: Transaction;
@@ -79,14 +80,10 @@ export const TransactionRow = memo(function TransactionRow({ transaction, catego
             {subtitle ? <span className="block truncate text-sm text-fg-muted">{subtitle}</span> : null}
           </span>
           <span className="shrink-0 text-right">
-            <span
-              className={cx(
-                'block font-bold tabular',
-                transaction.type === 'expense' ? 'text-expense-strong' : 'text-income-strong',
-              )}
-            >
-              {amount}
-            </span>
+            <span className={cx('block font-bold tabular', AMOUNT_TEXT[transaction.type])}>{amount}</span>
+            {transaction.type === 'savings' || transaction.type === 'investment' ? (
+              <span className="block text-xs font-semibold text-fg-muted">{strings.transactions.kindTag[transaction.type]}</span>
+            ) : null}
             {foreign ? (
               <span className="block text-xs text-fg-muted tabular">
                 {strings.transactions.convertedApprox(

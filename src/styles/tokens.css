@@ -48,6 +48,13 @@
   --expense: #E5372D;
   --expense-strong: #C7251C;
 
+  /* Savings and investments (money set aside, not spent): teal and amber, distinct from income
+     green and expense red. Always shown with an icon and a label too, never color alone. */
+  --savings: #0D9488;
+  --savings-strong: #0F766E;
+  --investment: #B45309;
+  --investment-strong: #92400E;
+
   /* Text on accent fills, and on the hero card */
   --on-accent: #FFFFFF;
   --on-hero: #FFFFFF;
@@ -67,12 +74,16 @@
 
   /* Overlays and elevation */
   --scrim: rgb(0 0 0 / 0.28);
+  /* Thin scrollbar handles (on a transparent track) */
+  --scrollbar-thumb: rgb(0 0 0 / 0.26);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.03), 0 10px 30px rgb(0 0 0 / 0.06);
   --shadow-raised: 0 20px 60px rgb(0 0 0 / 0.18);
 
   /* Derived tints (summary tiles, selected chips, hover states) */
   --income-tint: color-mix(in oklab, var(--income) 12%, var(--surface));
   --expense-tint: color-mix(in oklab, var(--expense) 11%, var(--surface));
+  --savings-tint: color-mix(in oklab, var(--savings) 12%, var(--surface));
+  --investment-tint: color-mix(in oklab, var(--investment) 12%, var(--surface));
   --accent-tint: color-mix(in oklab, var(--accent) 10%, var(--surface));
   --hover: color-mix(in oklab, var(--text) 5%, transparent);
 }
@@ -104,6 +115,11 @@
   --expense: #FF453A;
   --expense-strong: #FF6961;
 
+  --savings: #2DD4BF;
+  --savings-strong: #5EEAD4;
+  --investment: #FBBF24;
+  --investment-strong: #FCD34D;
+
   --on-accent: #000000;
 
   --chart-1: #5EEAD4;
@@ -116,11 +132,14 @@
   --chart-other: #8E8E93;
 
   --scrim: rgb(0 0 0 / 0.55);
+  --scrollbar-thumb: rgb(255 255 255 / 0.28);
   --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-raised: 0 20px 60px rgb(0 0 0 / 0.6);
 
   --income-tint: color-mix(in oklab, var(--income) 16%, var(--surface));
   --expense-tint: color-mix(in oklab, var(--expense) 16%, var(--surface));
+  --savings-tint: color-mix(in oklab, var(--savings) 16%, var(--surface));
+  --investment-tint: color-mix(in oklab, var(--investment) 16%, var(--surface));
   --accent-tint: color-mix(in oklab, var(--accent) 16%, var(--surface));
   --hover: color-mix(in oklab, var(--text) 8%, transparent);
 }

@@ -160,15 +160,27 @@ export function formatMoneyCompact(minor: number, currency: string, exponent: nu
   return fmt.format(minorToDecimal(minor, exponent) as Intl.StringNumericLiteral);
 }
 
-/** A transaction amount with its sign: expenses negative, income positive (the non-color cue). */
+/**
+ * A tiny amount for tight spaces (calendar days): two significant digits, compact, no currency
+ * symbol, e.g. "570", "1.7K", "24K", "1.5L" (en-IN). The full amount is always available nearby.
+ */
+export function formatAmountTiny(minor: number, exponent: number, locale?: string): string {
+  const fmt = formatter('tiny', locale, { notation: 'compact', maximumSignificantDigits: 2 });
+  return fmt.format(minorToDecimal(minor, exponent) as Intl.StringNumericLiteral);
+}
+
+/**
+ * A transaction amount with its sign (the non-color cue): income positive; expenses, savings and
+ * investments negative (money leaving the month's spending pool).
+ */
 export function formatSignedMoney(
-  type: 'expense' | 'income',
+  type: 'expense' | 'income' | 'savings' | 'investment',
   minor: number,
   currency: string,
   exponent: number,
   locale?: string,
 ): string {
-  return formatMoney(type === 'expense' ? -minor : minor, currency, exponent, {
+  return formatMoney(type === 'income' ? minor : -minor, currency, exponent, {
     sign: 'exceptZero',
     ...(locale ? { locale } : {}),
   });

@@ -21,6 +21,7 @@ import { strings } from '@/strings/en';
 import { useRecentPayees, useSaveTransaction, type Transaction, type TransactionInput } from './api';
 import type { EditorKind } from './editor-context';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
+import { TRANSACTION_TYPES } from './kinds';
 
 type Repeat = NonNullable<TransactionInput['repeat']> | 'none';
 const REPEAT_OPTIONS: readonly Repeat[] = ['none', 'daily', 'weekly', 'monthly', 'yearly'];
@@ -130,9 +131,10 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
   }
 
   const payeeListId = useId();
-  const kindOptions = (editing ? (['expense', 'income'] as const) : (['expense', 'income', 'iou'] as const)).map(
-    (value) => ({ value, label: s.kinds[value] }),
-  );
+  const kindOptions = (editing ? TRANSACTION_TYPES : [...TRANSACTION_TYPES, 'iou' as const]).map((value) => ({
+    value,
+    label: s.kindTabs[value],
+  }));
 
   return (
     <div className="flex flex-col gap-5">

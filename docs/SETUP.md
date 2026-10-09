@@ -71,6 +71,16 @@ That's fine for your own account. Before anyone else signs up:
 1. Create an account with an email provider (e.g. https://resend.com, free tier).
 2. In Supabase: **Authentication → Emails → SMTP Settings**: enable custom SMTP and enter the provider's host, port, user and password.
 
+## When an update includes database changes
+
+Some updates add to the database (new tables, columns or functions, in `supabase/migrations/`).
+Apply them before the new version of the app goes live: in `D:	racker`, run
+
+    npx supabase db push
+
+(it lists the new migrations and asks to confirm; `supabase link` from step 3 is remembered).
+App-only updates need nothing: pushing to GitHub redeploys on Vercel.
+
 ## If the Supabase project ever changes
 
 The site's Content-Security-Policy only allows the current project. Update the project URL in

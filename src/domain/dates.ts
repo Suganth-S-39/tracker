@@ -97,6 +97,16 @@ export function formatDayHeading(
   }).format(toUtc(date));
 }
 
+/** "Thursday, October 9" (the calendar's accessible day names). */
+export function formatDayLong(date: IsoDate, locale?: string): string {
+  return dateFormatter(locale, { weekday: 'long', month: 'long', day: 'numeric' }).format(toUtc(date));
+}
+
+/** The weekday of a date: "Mon" (short) or "Monday" (long). */
+export function formatWeekday(date: IsoDate, style: 'short' | 'long', locale?: string): string {
+  return dateFormatter(locale, { weekday: style }).format(toUtc(date));
+}
+
 /** "Oct 6, 2026" */
 export function formatDate(date: IsoDate, locale?: string): string {
   return dateFormatter(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(toUtc(date));

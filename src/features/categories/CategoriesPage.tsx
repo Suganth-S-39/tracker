@@ -13,6 +13,7 @@ import { strings } from '@/strings/en';
 import { useCategories, useSetCategoryHidden, type Category, type TransactionType } from './api';
 import { CategoryEditor } from './CategoryEditor';
 import { CategoryIcon } from './CategoryIcon';
+import { TRANSACTION_TYPES } from '@/features/transactions/kinds';
 
 const s = strings.categories;
 
@@ -73,7 +74,7 @@ export function CategoriesPage() {
     <>
       <Link
         to="/settings"
-        className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 pt-safe text-sm font-semibold text-fg-muted hover:text-fg"
+        className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 text-sm font-semibold text-fg-muted hover:text-fg"
       >
         <ChevronLeft aria-hidden="true" className="size-4" />
         {strings.pages.settings.title}
@@ -94,7 +95,7 @@ export function CategoriesPage() {
         ) : (categories.isError && categories.data === undefined) ? (
           <ErrorState error={categories.error} onRetry={() => void categories.refetch()} />
         ) : (
-          (['expense', 'income'] as const).map(section)
+          TRANSACTION_TYPES.map(section)
         )}
       </div>
 

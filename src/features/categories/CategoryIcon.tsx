@@ -2,11 +2,13 @@ import { createElement } from 'react';
 import { cx } from '@/lib/cx';
 import { categoryIcon } from './icons';
 
-type Tone = 'expense' | 'income' | 'neutral';
+type Tone = 'expense' | 'income' | 'savings' | 'investment' | 'neutral';
 
 const tones: Record<Tone, string> = {
   expense: 'bg-expense-tint text-expense-strong',
   income: 'bg-income-tint text-income-strong',
+  savings: 'bg-savings-tint text-savings-strong',
+  investment: 'bg-investment-tint text-investment-strong',
   neutral: 'bg-accent-tint text-accent-strong',
 };
 

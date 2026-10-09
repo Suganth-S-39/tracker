@@ -31,7 +31,7 @@ export function PrivacyPage() {
   usePageTitle(strings.pages.privacy.title);
   const p = strings.privacy;
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 py-10 pt-safe">
+    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-4 pt-page pb-10">
       <div className="mb-8 flex items-center justify-between gap-4">
         <BackButton />
         <BrandMark />

@@ -48,8 +48,10 @@ export function CategoryEditor({ category, onDone }: { category?: Category | und
           value={kind}
           onChange={setKind}
           options={[
-            { value: 'expense', label: strings.form.kinds.expense },
-            { value: 'income', label: strings.form.kinds.income },
+            { value: 'expense', label: strings.form.kindTabs.expense },
+            { value: 'income', label: strings.form.kindTabs.income },
+            { value: 'savings', label: strings.form.kindTabs.savings },
+            { value: 'investment', label: strings.form.kindTabs.investment },
           ]}
         />
       )}

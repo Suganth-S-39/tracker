@@ -133,13 +133,13 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "accent_theme": Database["public"]['Enums']["accent_theme"],"base_currency": string | null,"created_at": string,"deleted_at": string | null,"display_name": string | null,"email": string | null,"id": string,"theme_mode": Database["public"]['Enums']["theme_mode"],"timezone": string,"updated_at": string,"user_id": string
+                    "accent_theme": Database["public"]['Enums']["accent_theme"],"avatar_data_url": string | null,"base_currency": string | null,"created_at": string,"deleted_at": string | null,"display_name": string | null,"email": string | null,"id": string,"theme_mode": Database["public"]['Enums']["theme_mode"],"timezone": string,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "accent_theme"?: Database["public"]['Enums']["accent_theme"],"base_currency"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"display_name"?: string | null,"email"?: string | null,"id"?: string,"theme_mode"?: Database["public"]['Enums']["theme_mode"],"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                    "accent_theme"?: Database["public"]['Enums']["accent_theme"],"avatar_data_url"?: string | null,"base_currency"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"display_name"?: string | null,"email"?: string | null,"id"?: string,"theme_mode"?: Database["public"]['Enums']["theme_mode"],"timezone"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "accent_theme"?: Database["public"]['Enums']["accent_theme"],"base_currency"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"display_name"?: string | null,"email"?: string | null,"id"?: string,"theme_mode"?: Database["public"]['Enums']["theme_mode"],"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                    "accent_theme"?: Database["public"]['Enums']["accent_theme"],"avatar_data_url"?: string | null,"base_currency"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"display_name"?: string | null,"email"?: string | null,"id"?: string,"theme_mode"?: Database["public"]['Enums']["theme_mode"],"timezone"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -256,8 +256,9 @@ isOneToOne: false
             }[]
                            },
 "complete_onboarding":
-{ Args: { "p_base_currency": string,"p_timezone": string }; Returns: {
+{ Args: { "p_avatar_data_url"?: string,"p_base_currency": string,"p_display_name"?: string,"p_timezone": string }; Returns: {
               "accent_theme": Database["public"]['Enums']["accent_theme"],
+"avatar_data_url": string | null,
 "base_currency": string | null,
 "created_at": string,
 "deleted_at": string | null,
@@ -283,6 +284,11 @@ isOneToOne: false
                            },
 "create_transaction":
 { Args: { "p_base_amount_minor": number,"p_category_id": string,"p_date": string,"p_exchange_rate": string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_payee"?: string,"p_repeat"?: Database["public"]['Enums']["recurrence_frequency"],"p_type": Database["public"]['Enums']["transaction_type"] }; Returns: string
+                           },
+"daily_totals":
+{ Args: { "p_exclude_iou"?: boolean,"p_month": string }; Returns: {
+              "day": string,"expense_minor": number,"income_minor": number,"transaction_count": number
+            }[]
                            },
 "delete_iou":
 { Args: { "p_id": string }; Returns: undefined
@@ -310,7 +316,7 @@ isOneToOne: false
                            },
 "month_summary":
 { Args: { "p_month": string }; Returns: {
-              "expense_minor": number,"income_minor": number,"net_minor": number
+              "expense_minor": number,"income_minor": number,"investment_minor": number,"net_minor": number,"savings_minor": number
             }[]
                            },
 "monthly_totals":
@@ -348,7 +354,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "accent_theme": "graphite"|"green"|"teal"|"gold"|"rose","iou_direction": "lent"|"borrowed","recurrence_frequency": "daily"|"weekly"|"monthly"|"yearly","system_category_key": "lent"|"repayment_received"|"borrowed"|"repayment_paid","theme_mode": "light"|"dark"|"system","transaction_type": "expense"|"income"
+            "accent_theme": "graphite"|"green"|"teal"|"gold"|"rose","iou_direction": "lent"|"borrowed","recurrence_frequency": "daily"|"weekly"|"monthly"|"yearly","system_category_key": "lent"|"repayment_received"|"borrowed"|"repayment_paid","theme_mode": "light"|"dark"|"system","transaction_type": "expense"|"income"|"savings"|"investment"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -464,7 +470,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "accent_theme": ["graphite", "green", "teal", "gold", "rose"],"iou_direction": ["lent", "borrowed"],"recurrence_frequency": ["daily", "weekly", "monthly", "yearly"],"system_category_key": ["lent", "repayment_received", "borrowed", "repayment_paid"],"theme_mode": ["light", "dark", "system"],"transaction_type": ["expense", "income"]
+            "accent_theme": ["graphite", "green", "teal", "gold", "rose"],"iou_direction": ["lent", "borrowed"],"recurrence_frequency": ["daily", "weekly", "monthly", "yearly"],"system_category_key": ["lent", "repayment_received", "borrowed", "repayment_paid"],"theme_mode": ["light", "dark", "system"],"transaction_type": ["expense", "income", "savings", "investment"]
           }
         }
 } as const

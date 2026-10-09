@@ -1,4 +1,3 @@
-import { CircleUserRound } from 'lucide-react';
 import { Link } from 'react-router';
 import { BudgetSnapshot } from '@/features/budgets/BudgetSnapshot';
 import { IouSummaryCard } from '@/features/ious/IouSummaryCard';
@@ -9,6 +8,8 @@ import { usePageTitle } from '@/lib/usePageTitle';
 import { strings } from '@/strings/en';
 import { HeroCard } from './HeroCard';
 import { RecentTransactions } from './RecentTransactions';
+import { useProfile } from '@/features/profile/api';
+import { Avatar } from '@/features/profile/Avatar';
 
 /**
  * Home (spec section 8), top to bottom on phones: top bar, balance, IOU summary, budget snapshot,
@@ -17,18 +18,19 @@ import { RecentTransactions } from './RecentTransactions';
 export function HomePage() {
   const money = useMoney();
   const { month } = useSelectedMonth();
+  const profile = useProfile();
   usePageTitle(strings.pages.home.title);
 
   return (
     <>
-      <header className="flex min-h-14 items-center justify-between gap-3 pt-safe">
+      <header className="flex min-h-14 items-center justify-between gap-3">
         <h1 className="sr-only">{strings.pages.home.title}</h1>
         <Link
           to="/settings"
           aria-label={strings.nav.openSettings}
-          className="grid size-11 place-items-center rounded-full text-fg-muted hover:bg-hover hover:text-fg"
+          className="grid size-11 place-items-center rounded-full hover:bg-hover"
         >
-          <CircleUserRound aria-hidden="true" className="size-7" />
+          <Avatar profile={profile.data} />
         </Link>
         <MonthSelector />
       </header>

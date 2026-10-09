@@ -94,7 +94,7 @@ describe.each(combos)('%s mode, %s accent', (mode, accent) => {
   const everywhere = [...backdrops, ...panels];
   const worstOn = (fg: Rgba, backgrounds: Rgba[]) => Math.min(...backgrounds.map((bg) => contrast(fg, bg)));
 
-  it.each([['--text'], ['--text-muted'], ['--income-strong'], ['--expense-strong'], ['--accent-strong']])(
+  it.each([['--text'], ['--text-muted'], ['--income-strong'], ['--expense-strong'], ['--savings-strong'], ['--investment-strong'], ['--accent-strong']])(
     '%s is readable as text on the page and on glass',
     (token) => {
       expect(worstOn(color(token), everywhere)).toBeGreaterThanOrEqual(AA_TEXT);
@@ -120,6 +120,8 @@ describe.each(combos)('%s mode, %s accent', (mode, accent) => {
   it.each([
     ['--income'],
     ['--expense'],
+    ['--savings'],
+    ['--investment'],
     ['--accent'],
     ['--chart-1'],
     ['--chart-2'],

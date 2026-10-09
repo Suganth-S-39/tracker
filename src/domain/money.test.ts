@@ -4,6 +4,7 @@ import {
   deriveRate,
   formatMoney,
   formatRate,
+  formatAmountTiny,
   formatSignedMoney,
   minorToDecimal,
   normalizeRate,
@@ -147,6 +148,19 @@ describe('formatting', () => {
   it('pairs expense and income with a sign', () => {
     expect(formatSignedMoney('expense', 12050, 'USD', 2, 'en-US')).toBe('-$120.50');
     expect(formatSignedMoney('income', 12050, 'USD', 2, 'en-US')).toBe('+$120.50');
+  });
+
+  it('formats tiny amounts for calendar days', () => {
+    expect(formatAmountTiny(56942, 2, 'en-US')).toBe('570');
+    expect(formatAmountTiny(170000, 2, 'en-US')).toBe('1.7K');
+    expect(formatAmountTiny(2400000, 2, 'en-US')).toBe('24K');
+    expect(formatAmountTiny(15000000, 2, 'en-IN')).toBe('1.5L');
+    expect(formatAmountTiny(500, 0, 'en-US')).toBe('500');
+  });
+
+  it('shows savings and investments as money leaving the spending pool', () => {
+    expect(formatSignedMoney('savings', 500000, 'INR', 2, 'en-IN')).toBe('-₹5,000.00');
+    expect(formatSignedMoney('investment', 1000000, 'INR', 2, 'en-IN')).toBe('-₹10,000.00');
   });
 
   it('formats huge amounts exactly', () => {

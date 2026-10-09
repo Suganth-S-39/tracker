@@ -1,11 +1,13 @@
 import { Plus, ReceiptText, Search, SearchX } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { TextField } from '@/components/ui/Field';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { Select, type SelectItems } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Stale } from '@/components/ui/Stale';
@@ -17,12 +19,16 @@ import { strings } from '@/strings/en';
 import { useTransactionPages } from './api';
 import { useTransactionEditor } from './editor-context';
 import { EMPTY_FILTERS, hasActiveFilters, toQueryFilters, type DatePreset, type FilterState } from './filters';
+import { CalendarView } from './CalendarView';
 import { TransactionList } from './TransactionList';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
+import { TRANSACTION_TYPES } from './kinds';
 
 const f = strings.transactions.filters;
 
 const SEARCH_DEBOUNCE_MS = 250;
+
+type View = 'list' | 'calendar';
 
 /** A filter chip that opens the app's dropdown list (see Select). */
 function FilterSelect({
@@ -68,8 +74,12 @@ export function TransactionsPage() {
     return () => window.clearTimeout(timer);
   }, [searchText]);
 
+  // List or calendar, kept in the address so reloads and Back keep it.
+  const [params, setParams] = useSearchParams();
+  const view: View = params.get('view') === 'calendar' ? 'calendar' : 'list';
+
   const queryFilters = useMemo(() => toQueryFilters(filters), [filters]);
-  const pages = useTransactionPages(queryFilters);
+  const pages = useTransactionPages(queryFilters, { enabled: view === 'list' });
   const transactions = useMemo(() => pages.data?.pages.flat() ?? [], [pages.data]);
   const filtered = hasActiveFilters(filters);
 
@@ -88,132 +98,152 @@ export function TransactionsPage() {
   return (
     <>
       <PageHeader title={strings.pages.transactions.title} />
+      <div className="mt-1 max-w-xs">
+        <SegmentedControl
+          hideLabel
+          label={strings.transactions.views.label}
+          value={view}
+          options={[
+            { value: 'list', label: strings.transactions.views.list },
+            { value: 'calendar', label: strings.transactions.views.calendar },
+          ]}
+          onChange={(next) => setParams(next === 'calendar' ? { view: 'calendar' } : {}, { replace: true })}
+        />
+      </div>
 
-      {/* A floating frosted panel that stays put while the list scrolls under it. */}
-      <div className="glass-float sticky top-[calc(env(safe-area-inset-top)+0.5rem)] z-20 mt-2 rounded-card p-3">
-        <div className="relative">
-          <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-fg-muted" />
-          <input
-            type="search"
-            aria-label={strings.transactions.searchLabel}
-            placeholder={strings.transactions.searchLabel}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="block h-12 w-full rounded-control border border-control-border bg-surface pr-3.5 pl-11 text-base placeholder:text-fg-muted"
-          />
-        </div>
+      {view === 'calendar' ? (
+        money ? (
+          <div className="mt-4">
+            <CalendarView money={money} onOpen={editor.openEdit} onDelete={online ? deleteWithUndo : undefined} />
+          </div>
+        ) : (
+          <Skeleton className="mt-4 h-80" />
+        )
+      ) : (
+        <>
+        {/* A floating frosted panel that stays put while the list scrolls under it. */}
+        <div className="glass-float sticky top-[calc(env(safe-area-inset-top)+0.5rem)] z-20 mt-2 rounded-card p-3">
+          <div className="relative">
+            <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-fg-muted" />
+            <input
+              type="search"
+              aria-label={strings.transactions.searchLabel}
+              placeholder={strings.transactions.searchLabel}
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="block h-12 w-full rounded-control border border-control-border bg-surface pr-3.5 pl-11 text-base placeholder:text-fg-muted"
+            />
+          </div>
 
-        {/* Padding inside the scrolling row (offset by negative margins), so focus rings aren't clipped. */}
-        <div role="group" aria-label={f.label} className="-mx-1 mt-2 flex items-center gap-2 overflow-x-auto p-1">
-          <FilterSelect
-            label={f.type}
-            active={filters.type !== ''}
-            value={filters.type}
-            onChange={(v) => update({ type: v as FilterState['type'] })}
-            items={[
-              { value: '', label: f.allTypes },
-              { value: 'expense', label: strings.form.kinds.expense },
-              { value: 'income', label: strings.form.kinds.income },
-            ]}
-          />
+          {/* Padding inside the scrolling row (offset by negative margins), so focus rings aren't clipped. */}
+          <div role="group" aria-label={f.label} className="-mx-1 mt-2 flex scrollbar-none items-center gap-2 overflow-x-auto p-1">
+            <FilterSelect
+              label={f.type}
+              active={filters.type !== ''}
+              value={filters.type}
+              onChange={(v) => update({ type: v as FilterState['type'] })}
+              items={[{ value: '', label: f.allTypes }, ...TRANSACTION_TYPES.map((kind) => ({ value: kind, label: strings.form.kinds[kind] }))]}
+            />
 
-          <FilterSelect
-            label={f.category}
-            active={filters.categoryId !== ''}
-            value={filters.categoryId}
-            onChange={(v) => update({ categoryId: v })}
-            items={[
-              { value: '', label: f.allCategories },
-              { label: strings.categories.sections.expense, options: expenseCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
-              { label: strings.categories.sections.income, options: incomeCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
-            ]}
-          />
+            <FilterSelect
+              label={f.category}
+              active={filters.categoryId !== ''}
+              value={filters.categoryId}
+              onChange={(v) => update({ categoryId: v })}
+              items={[
+                { value: '', label: f.allCategories },
+                { label: strings.categories.sections.expense, options: expenseCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
+                { label: strings.categories.sections.income, options: incomeCategories.map((c) => ({ value: c.id, label: categoryLabel(c) })) },
+              ]}
+            />
 
-          <FilterSelect
-            label={f.date}
-            active={filters.datePreset !== 'all'}
-            value={filters.datePreset}
-            onChange={(v) => update({ datePreset: v as DatePreset })}
-            items={[
-              { value: 'all', label: f.allTime },
-              { value: 'thisMonth', label: f.thisMonth },
-              { value: 'lastMonth', label: f.lastMonth },
-              { value: 'last3Months', label: f.last3Months },
-              { value: 'custom', label: f.custom },
-            ]}
-          />
+            <FilterSelect
+              label={f.date}
+              active={filters.datePreset !== 'all'}
+              value={filters.datePreset}
+              onChange={(v) => update({ datePreset: v as DatePreset })}
+              items={[
+                { value: 'all', label: f.allTime },
+                { value: 'thisMonth', label: f.thisMonth },
+                { value: 'lastMonth', label: f.lastMonth },
+                { value: 'last3Months', label: f.last3Months },
+                { value: 'custom', label: f.custom },
+              ]}
+            />
 
-          {filtered ? (
-            <button type="button" onClick={clearFilters} className="h-9 shrink-0 rounded-full px-3 text-sm font-semibold text-accent-strong hover:bg-hover">
-              {strings.transactions.clearFilters}
-            </button>
+            {filtered ? (
+              <button type="button" onClick={clearFilters} className="h-9 shrink-0 rounded-full px-3 text-sm font-semibold text-accent-strong hover:bg-hover">
+                {strings.transactions.clearFilters}
+              </button>
+            ) : null}
+          </div>
+
+          {filters.datePreset === 'custom' ? (
+            <div className="mt-2 grid grid-cols-2 gap-3">
+              <TextField label={f.from} type="date" value={filters.customFrom} onChange={(e) => update({ customFrom: e.target.value })} />
+              <TextField label={f.to} type="date" value={filters.customTo} onChange={(e) => update({ customTo: e.target.value })} />
+            </div>
           ) : null}
         </div>
 
-        {filters.datePreset === 'custom' ? (
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            <TextField label={f.from} type="date" value={filters.customFrom} onChange={(e) => update({ customFrom: e.target.value })} />
-            <TextField label={f.to} type="date" value={filters.customTo} onChange={(e) => update({ customTo: e.target.value })} />
-          </div>
-        ) : null}
-      </div>
-
-      <Card className="mt-1 p-2">
-        {pages.isPending || !money ? (
-          <div className="flex flex-col gap-2 p-1" aria-busy="true">
-            <Skeleton className="mt-2 h-4 w-24" />
-            {Array.from({ length: 6 }, (_, i) => (
-              <div key={i} className="flex items-center gap-3 py-2">
-                <Skeleton className="size-10 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-2/5" />
-                  <Skeleton className="mt-2 h-3 w-1/4" />
+        <Card className="mt-1 p-2">
+          {pages.isPending || !money ? (
+            <div className="flex flex-col gap-2 p-1" aria-busy="true">
+              <Skeleton className="mt-2 h-4 w-24" />
+              {Array.from({ length: 6 }, (_, i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <Skeleton className="size-10 rounded-full" />
+                  <div className="flex-1">
+                    <Skeleton className="h-4 w-2/5" />
+                    <Skeleton className="mt-2 h-3 w-1/4" />
+                  </div>
+                  <Skeleton className="h-4 w-16" />
                 </div>
-                <Skeleton className="h-4 w-16" />
-              </div>
-            ))}
-          </div>
-        ) : (pages.isError && pages.data === undefined) ? (
-          <ErrorState error={pages.error} onRetry={() => void pages.refetch()} />
-        ) : transactions.length === 0 ? (
-          filtered ? (
-            <EmptyState
-              icon={SearchX}
-              title={strings.transactions.noResultsTitle}
-              body={strings.transactions.noResultsBody}
-              action={
-                <Button variant="secondary" onClick={clearFilters}>
-                  {strings.transactions.clearFilters}
-                </Button>
-              }
-            />
+              ))}
+            </div>
+          ) : (pages.isError && pages.data === undefined) ? (
+            <ErrorState error={pages.error} onRetry={() => void pages.refetch()} />
+          ) : transactions.length === 0 ? (
+            filtered ? (
+              <EmptyState
+                icon={SearchX}
+                title={strings.transactions.noResultsTitle}
+                body={strings.transactions.noResultsBody}
+                action={
+                  <Button variant="secondary" onClick={clearFilters}>
+                    {strings.transactions.clearFilters}
+                  </Button>
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={ReceiptText}
+                title={strings.transactions.emptyTitle}
+                body={strings.transactions.emptyBody}
+                action={
+                  <Button onClick={() => editor.openCreate()} icon={<Plus aria-hidden="true" className="size-4" />}>
+                    {strings.nav.addLong}
+                  </Button>
+                }
+              />
+            )
           ) : (
-            <EmptyState
-              icon={ReceiptText}
-              title={strings.transactions.emptyTitle}
-              body={strings.transactions.emptyBody}
-              action={
-                <Button onClick={() => editor.openCreate()} icon={<Plus aria-hidden="true" className="size-4" />}>
-                  {strings.nav.addLong}
-                </Button>
-              }
-            />
-          )
-        ) : (
-          <Stale stale={pages.isPlaceholderData}>
-            <TransactionList
-              transactions={transactions}
-              categories={categoryMap}
-              money={money}
-              hasMore={pages.hasNextPage && !pages.isPlaceholderData}
-              loadingMore={pages.isFetchingNextPage}
-              onLoadMore={() => void pages.fetchNextPage()}
-              onOpen={editor.openEdit}
-              onDelete={online ? deleteWithUndo : undefined}
-            />
-          </Stale>
-        )}
-      </Card>
+            <Stale stale={pages.isPlaceholderData}>
+              <TransactionList
+                transactions={transactions}
+                categories={categoryMap}
+                money={money}
+                hasMore={pages.hasNextPage && !pages.isPlaceholderData}
+                loadingMore={pages.isFetchingNextPage}
+                onLoadMore={() => void pages.fetchNextPage()}
+                onOpen={editor.openEdit}
+                onDelete={online ? deleteWithUndo : undefined}
+              />
+            </Stale>
+          )}
+        </Card>
+        </>
+      )}
     </>
   );
 }

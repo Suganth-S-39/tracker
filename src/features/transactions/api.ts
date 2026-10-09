@@ -9,6 +9,7 @@ import {
 import { monthRange, type IsoDate, type MonthKey } from '@/domain/dates';
 import { queryKeys } from '@/lib/queryClient';
 import { supabase, type Database } from '@/lib/supabase';
+import type { TransactionType } from './kinds';
 
 type ListRow = Database['public']['Functions']['list_transactions']['Returns'][number];
 
@@ -22,7 +23,7 @@ export type Transaction = Omit<ListRow, 'payee' | 'note' | 'iou_id' | 'recurring
 };
 
 export type TransactionFilters = {
-  type?: 'expense' | 'income';
+  type?: TransactionType;
   categoryId?: string;
   from?: IsoDate;
   to?: IsoDate;
@@ -50,8 +51,9 @@ async function listTransactions(filters: TransactionFilters, limit: number, curs
 }
 
 /** The Transactions page: pages of 50, newest first, loaded as the user scrolls. */
-export function useTransactionPages(filters: TransactionFilters) {
+export function useTransactionPages(filters: TransactionFilters, { enabled = true }: { enabled?: boolean } = {}) {
   return useInfiniteQuery({
+    enabled,
     queryKey: queryKeys.transactions.list(filters),
     // Changing a filter keeps the current list on screen (dimmed) until the new results arrive.
     placeholderData: keepPreviousData,
@@ -87,9 +89,16 @@ export function useHasAnyTransactions() {
   });
 }
 
-export type MonthSummary = { income_minor: number; expense_minor: number; net_minor: number };
+export type MonthSummary = {
+  income_minor: number;
+  expense_minor: number;
+  savings_minor: number;
+  investment_minor: number;
+  /** What's left: income minus expenses, savings and investments. */
+  net_minor: number;
+};
 
-/** Income, expense and net for a month, in base minor units (IOU-linked excluded, in SQL). */
+/** Income, expenses, savings, investments and what's left for a month, in base minor units (IOU-linked excluded, in SQL). */
 export function useMonthSummary(month: MonthKey) {
   return useQuery({
     queryKey: queryKeys.transactions.summary(month),
@@ -99,7 +108,31 @@ export function useMonthSummary(month: MonthKey) {
     queryFn: async (): Promise<MonthSummary> => {
       const { data, error } = await supabase.rpc('month_summary', { p_month: `${month}-01` });
       if (error) throw error;
-      return data[0] ?? { income_minor: 0, expense_minor: 0, net_minor: 0 };
+      return data[0] ?? { income_minor: 0, expense_minor: 0, savings_minor: 0, investment_minor: 0, net_minor: 0 };
+    },
+  });
+}
+
+export type DayTotals = { day: IsoDate; incomeMinor: number; expenseMinor: number; count: number };
+
+/**
+ * Income, spending and number of transactions per day of a month, for the calendar (SQL, base
+ * currency; savings, investments and IOU movements don't count as spending). Days without
+ * activity are absent.
+ */
+export function useDailyTotals(month: MonthKey) {
+  return useQuery({
+    queryKey: queryKeys.transactions.daily(month),
+    placeholderData: keepPreviousData,
+    queryFn: async (): Promise<DayTotals[]> => {
+      const { data, error } = await supabase.rpc('daily_totals', { p_month: `${month}-01` });
+      if (error) throw error;
+      return data.map((row) => ({
+        day: row.day,
+        incomeMinor: row.income_minor,
+        expenseMinor: row.expense_minor,
+        count: row.transaction_count,
+      }));
     },
   });
 }
@@ -117,7 +150,7 @@ export function useRecentPayees() {
 }
 
 export type TransactionInput = {
-  type: 'expense' | 'income';
+  type: TransactionType;
   categoryId: string;
   date: IsoDate;
   originalAmountMinor: number;

@@ -69,6 +69,9 @@ export function Select({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const triggerRef = useRef<HTMLDivElement>(null);
+  // The frosted panel (popover, clipped to its rounded corners) and the list scrolling inside it,
+  // inset by the panel's padding so its scrollbar never pokes past the corners.
+  const panelRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const typeahead = useRef({ text: '', timer: 0 });
 
@@ -145,26 +148,28 @@ export function Select({
     }
   }
 
-  // Show the list in the top layer and place it next to the control.
+  // Show the panel in the top layer and place it next to the control.
   useLayoutEffect(() => {
+    const panel = panelRef.current;
     const list = listRef.current;
     const trigger = triggerRef.current;
-    if (!open || !list || !trigger) return;
-    if (!list.matches(':popover-open')) list.showPopover();
+    if (!open || !panel || !list || !trigger) return;
+    if (!panel.matches(':popover-open')) panel.showPopover();
     const rect = trigger.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportWidth = document.documentElement.clientWidth;
-    list.style.minWidth = `${rect.width}px`;
-    list.style.maxWidth = `${viewportWidth - VIEWPORT_MARGIN * 2}px`;
+    panel.style.minWidth = `${rect.width}px`;
+    panel.style.maxWidth = `${viewportWidth - VIEWPORT_MARGIN * 2}px`;
     const below = viewportHeight - rect.bottom - GAP - VIEWPORT_MARGIN;
     const above = rect.top - GAP - VIEWPORT_MARGIN;
-    const natural = list.scrollHeight;
+    const chrome = panel.offsetHeight - list.offsetHeight; // the panel's padding and border
+    const natural = list.scrollHeight + chrome;
     const placeBelow = natural <= below || below >= above;
     const height = Math.min(natural, MAX_LIST_HEIGHT, Math.max(placeBelow ? below : above, 120));
-    list.style.maxHeight = `${height}px`;
-    list.style.top = `${placeBelow ? rect.bottom + GAP : rect.top - GAP - height}px`;
-    list.style.left = `${Math.max(VIEWPORT_MARGIN, Math.min(rect.left, viewportWidth - VIEWPORT_MARGIN - list.offsetWidth))}px`;
-    list.style.transformOrigin = placeBelow ? 'top' : 'bottom';
+    list.style.maxHeight = `${height - chrome}px`;
+    panel.style.top = `${placeBelow ? rect.bottom + GAP : rect.top - GAP - height}px`;
+    panel.style.left = `${Math.max(VIEWPORT_MARGIN, Math.min(rect.left, viewportWidth - VIEWPORT_MARGIN - panel.offsetWidth))}px`;
+    panel.style.transformOrigin = placeBelow ? 'top' : 'bottom';
   }, [open]);
 
   // Keep the active option in view: centered when the list opens, then just enough while moving.
@@ -199,10 +204,10 @@ export function Select({
     const anchor = triggerRef.current?.getBoundingClientRect();
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
-      if (!triggerRef.current?.contains(target) && !listRef.current?.contains(target)) dismiss();
+      if (!triggerRef.current?.contains(target) && !panelRef.current?.contains(target)) dismiss();
     };
     const onScroll = (event: Event) => {
-      if (listRef.current?.contains(event.target as Node)) return;
+      if (panelRef.current?.contains(event.target as Node)) return;
       const now = triggerRef.current?.getBoundingClientRect();
       if (!anchor || !now || Math.abs(now.top - anchor.top) > 1 || Math.abs(now.left - anchor.left) > 1) dismiss();
     };
@@ -267,28 +272,33 @@ export function Select({
       </div>
       {open ? (
         <div
-          ref={listRef}
-          id={listId}
-          role="listbox"
+          ref={panelRef}
           popover="manual"
-          aria-labelledby={labelledBy}
-          aria-label={labelledBy ? undefined : label}
           // Keep focus on the combobox when an option is pressed.
           onMouseDown={(event) => event.preventDefault()}
-          className="glass-strong inset-auto m-0 animate-pop-in overflow-y-auto overscroll-contain rounded-2xl p-1.5 text-fg"
+          className="glass-strong inset-auto m-0 animate-pop-in overflow-hidden rounded-2xl p-1.5 text-fg"
         >
-          {items.map((item, groupIndex) =>
-            isGroup(item) ? (
-              <div key={`group-${item.label}`} role="group" aria-labelledby={`${id}-group-${groupIndex}`}>
-                <div id={`${id}-group-${groupIndex}`} className="px-2.5 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-fg-muted">
-                  {item.label}
+          <div
+            ref={listRef}
+            id={listId}
+            role="listbox"
+            aria-labelledby={labelledBy}
+            aria-label={labelledBy ? undefined : label}
+            className="scrollbar-subtle relative overflow-y-auto overscroll-contain"
+          >
+            {items.map((item, groupIndex) =>
+              isGroup(item) ? (
+                <div key={`group-${item.label}`} role="group" aria-labelledby={`${id}-group-${groupIndex}`}>
+                  <div id={`${id}-group-${groupIndex}`} className="px-2.5 pt-2.5 pb-1 text-xs font-semibold tracking-wide text-fg-muted">
+                    {item.label}
+                  </div>
+                  {item.options.map(renderOption)}
                 </div>
-                {item.options.map(renderOption)}
-              </div>
-            ) : (
-              renderOption(item)
-            ),
-          )}
+              ) : (
+                renderOption(item)
+              ),
+            )}
+          </div>
         </div>
       ) : null}
     </>

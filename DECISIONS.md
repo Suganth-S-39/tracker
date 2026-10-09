@@ -9,6 +9,9 @@ Every assumption is flagged here and in code comments, and kept easy to change.
 |---|---|---|
 | 2026-10-09 | **No Google sign-in.** Supabase Auth email/password only (spec sections 3, 4, 10 and 12 mention Google). | Google button, logo and OAuth redirect removed; no Google Cloud setup step. Email verification and password reset are unchanged. |
 | 2026-10-09 | **Monthly income-vs-expense bar chart** on Reports (spec section 3 lists bar charts as out of scope). | Last 12 months ending at the selected month (6 on phones); each month is a button that opens that month app-wide. Follows the Reports "Exclude IOU movements" switch. Query: `public.monthly_totals`. |
+| 2026-10-10 | **Calendar view** on Transactions: what was spent each day, tap a day for its transactions. | See *Calendar* below. SQL: `public.daily_totals`. |
+| 2026-10-10 | **Savings and investments** as their own kinds of transaction, with Home tiles. | See *Savings and investments* below. |
+| 2026-10-10 | **Profile photo** instead of the generic person icon; **name asked at first run** (photo optional). | See *Profile* below. |
 | 2026-10-09 | **Premium, Apple-inspired redesign** replacing spec section 7's palette: no purple or dark blue, high-quality type, glassmorphism, light and dark themes. | See *Design system* below. Accent themes are now Graphite (default), Green, Teal, Gold, Rose (database enum changed before any deploy). Income is green, expense is red. |
 
 ## Open items (spec section 13)
@@ -84,6 +87,25 @@ Every assumption is flagged here and in code comments, and kept easy to change.
 **Conversions**
 - When the user edits the converted amount, that exact amount is saved; the rate is derived from it, stored to 12 decimal places (half-even) and shown to 6 significant digits.
 - Rates in the database are stored against one pivot currency per fetch; cross rates are derived in SQL.
+
+**Calendar** (owner request, 2026-10-10)
+- A view of the Transactions page (List | Calendar, kept in the address as `?view=calendar`), not a new tab: the phone bar already has four tabs plus Add (Apple suggests at most five), and the calendar is another way to browse transactions.
+- Each day shows what was spent, tinted by amount relative to the month's biggest day (square-root scaled so ordinary days stay visible), with the amount in text (two significant digits, e.g. "−1.7K"; the full amounts are in each day's spoken label). Days with only savings or investments show a dot. Tapping a day lists its transactions below (beside on wide screens).
+- Daily totals come from SQL (`daily_totals`, base currency); savings, investments and IOU movements aren't "spent", matching Home and Budgets. Weeks start on the browser locale's first day. Keyboard: arrows by day and week, Home/End, Page Up/Down by month.
+
+**Savings and investments** (owner request, 2026-10-10)
+- Their own transaction kinds ('savings', 'investment') with their own starter categories (Savings account, Emergency fund, Fixed deposit; Mutual funds, Stocks, Gold, Retirement), added to existing accounts by the migration. Recurring works (e.g. a monthly SIP).
+- Not spending: budgets, the spending report and the calendar's "spent" count expenses only. Home shows four tiles (income, expenses, savings, investments) with the change from last month (arrow plus percent, only when last month had a value), and the balance is what's left: income − expenses − savings − investments.
+- Amounts show a "−" (money leaving the month's spending pool) in their own color (teal, amber) plus a "Savings"/"Investment" label: never color alone.
+- Alternative rejected: expense categories flagged as savings, which would show investments as red spending and inflate expense totals.
+
+**Profile** (owner requests, 2026-10-10)
+- First run asks for the name (required by the screen; the database keeps it optional so other callers are unaffected) and an optional photo, saved in the same `complete_onboarding` call as the base currency.
+- The photo is resized in the browser to a 256 px square (WebP, or JPEG where WebP can't be encoded, ≤ ~50 KB), which also drops metadata such as GPS location, and stored inline on the profile (`avatar_data_url`; the database only accepts raster data URLs up to 70,000 characters). Alternative: a Supabase Storage bucket, which needs its own policies, a CSP origin and cleanup on account deletion, for no benefit at this size. Without a photo, the person's initial is shown.
+
+**Scrollbars and spacing** (owner reports, 2026-10-10)
+- Thin, subtle scrollbars (a rounded handle on a transparent track: `scrollbar-subtle`, and on the page itself). Rows swiped sideways (filter chips) have none (`scrollbar-none`). Dropdown lists scroll inside an inset area, so the bar never crosses their rounded corners.
+- Page tops: one `pt-page` utility (notch or status bar plus 1.25rem, 2.5rem on wide screens) on the app's main area and the privacy page, instead of notch-only padding on each header.
 
 **Offline, install and updates** (phase 5)
 - Writes are never queued (spec section 5): mutations use TanStack Query's `networkMode: 'always'`, so a save attempted offline fails at once instead of waiting to replay later. Offline, every write control is disabled and a banner explains why.

@@ -20,6 +20,7 @@ import { useOnlineStatus } from '@/lib/hooks';
 import { strings } from '@/strings/en';
 import { useDeleteRecurringRule, useRecurringRules, useSetRecurringRuleActive, type RecurringRule } from './api';
 import { RecurringRuleForm } from './RecurringRuleForm';
+import { AMOUNT_TEXT } from '@/features/transactions/kinds';
 
 const s = strings.recurring;
 
@@ -63,7 +64,7 @@ export function RecurringPage() {
                   {s.every[rule.frequency]} · {rule.is_active ? s.next(formatDate(rule.next_due_date)) : s.paused}
                 </span>
               </span>
-              <span className={cx('shrink-0 font-bold tabular', rule.type === 'expense' ? 'text-expense-strong' : 'text-income-strong')}>
+              <span className={cx('shrink-0 font-bold tabular', AMOUNT_TEXT[rule.type])}>
                 {formatSignedMoney(rule.type, rule.amount_minor, rule.currency, money.exponentOf(rule.currency))}
               </span>
               <span className="flex shrink-0">
@@ -114,7 +115,7 @@ export function RecurringPage() {
     <>
       <Link
         to="/settings"
-        className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 pt-safe text-sm font-semibold text-fg-muted hover:text-fg"
+        className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 text-sm font-semibold text-fg-muted hover:text-fg"
       >
         <ChevronLeft aria-hidden="true" className="size-4" />
         {strings.pages.settings.title}

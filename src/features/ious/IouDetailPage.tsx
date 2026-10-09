@@ -52,7 +52,7 @@ export function IouDetailPage() {
   const close = () => setDialog({ kind: 'none' });
 
   const back = (
-    <Link to="/ious" className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 pt-safe text-sm font-semibold text-fg-muted hover:text-fg">
+    <Link to="/ious" className="-ml-2 inline-flex h-10 items-center gap-1 rounded-control px-2 text-sm font-semibold text-fg-muted hover:text-fg">
       <ChevronLeft aria-hidden="true" className="size-4" />
       {s.back}
     </Link>

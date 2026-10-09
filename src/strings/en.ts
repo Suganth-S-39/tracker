@@ -84,7 +84,14 @@ export const strings = {
 
   onboarding: {
     title: 'One last step',
-    subtitle: 'Choose the currency you think in. Totals, budgets and reports use it.',
+    subtitle: 'Tell us your name and choose the currency you think in. Totals, budgets and reports use it.',
+    nameLabel: 'Your name',
+    nameHint: 'Shown in the app only.',
+    nameRequired: 'Enter your name.',
+    photoAdd: 'Add a photo',
+    photoChange: 'Change photo',
+    photoRemove: 'Remove',
+    photoHint: 'Optional. Resized on your device; location and other photo details are removed.',
     currencyLabel: 'Base currency',
     currencyHint: "You can record amounts in any currency, but the base currency can't be changed later.",
     submit: 'Get started',
@@ -122,6 +129,15 @@ export const strings = {
     balanceFor: (month: string) => `Balance · ${month}`,
     income: 'Income',
     expenses: 'Expenses',
+    savings: 'Savings',
+    investments: 'Investments',
+    // The change from last month, next to each total (an arrow plus these words, never color alone).
+    change: {
+      up: (percent: string, month: string) => `Up ${percent} from ${month}`,
+      down: (percent: string, month: string) => `Down ${percent} from ${month}`,
+      same: (month: string) => `Same as ${month}`,
+      lessThanOne: '<1%',
+    },
     recent: 'Recent transactions',
     seeAll: 'See all',
     seeAllLabel: 'See all transactions',
@@ -146,8 +162,26 @@ export const strings = {
     delete: 'Delete',
     deleteLabel: (description: string) => `Delete ${description}`,
     openLabel: (description: string) => `Edit ${description}`,
-    deleted: { expense: 'Expense deleted', income: 'Income deleted' },
-    added: { expense: 'Expense added', income: 'Income added' },
+    deleted: { expense: 'Expense deleted', income: 'Income deleted', savings: 'Savings deleted', investment: 'Investment deleted' },
+    added: { expense: 'Expense added', income: 'Income added', savings: 'Savings added', investment: 'Investment added' },
+    // Shown under savings and investment amounts, so the kind never relies on color alone.
+    kindTag: { savings: 'Savings', investment: 'Investment' },
+    views: { label: 'View', list: 'List', calendar: 'Calendar' },
+    calendar: {
+      heading: (month: string) => `Spending in ${month}`,
+      monthSpent: (amount: string) => `${amount} spent`,
+      // Accessible name of a day: "Thursday 9 October: spent ₹1,250, 3 transactions".
+      day: (date: string, details: string) => `${date}: ${details}`,
+      spent: (amount: string) => `spent ${amount}`,
+      received: (amount: string) => `received ${amount}`,
+      count: (count: number) => (count === 1 ? '1 transaction' : `${count} transactions`),
+      nothing: 'nothing recorded',
+      today: 'today',
+      spentLabel: 'Spent',
+      receivedLabel: 'Received',
+      emptyDay: 'Nothing on this day.',
+      hint: 'Pick a day to see its transactions.',
+    },
     updated: 'Changes saved',
     undo: 'Undo',
     convertedApprox: (amount: string) => `≈ ${amount}`,
@@ -172,17 +206,19 @@ export const strings = {
 
   form: {
     addTitle: 'Add',
-    addDescription: 'Record an expense, income or IOU.',
-    editTitle: { expense: 'Edit expense', income: 'Edit income' },
+    addDescription: 'Record an expense, income, savings, investment or IOU.',
+    editTitle: { expense: 'Edit expense', income: 'Edit income', savings: 'Edit savings', investment: 'Edit investment' },
     editDescription: 'Change any detail, then save.',
     kindLabel: 'Type',
-    kinds: { expense: 'Expense', income: 'Income', iou: 'IOU' },
+    kinds: { expense: 'Expense', income: 'Income', savings: 'Savings', investment: 'Investment', iou: 'IOU' },
+    // Shorter labels for the Add form's tabs, so five fit on a phone.
+    kindTabs: { expense: 'Expense', income: 'Income', savings: 'Savings', investment: 'Invest', iou: 'IOU' },
     amount: 'Amount',
     currency: 'Currency',
     category: 'Category',
     manageCategories: 'Manage categories',
     date: 'Date',
-    payee: { expense: 'Paid to', income: 'Received from' },
+    payee: { expense: 'Paid to', income: 'Received from', savings: 'Saved to', investment: 'Invested in' },
     note: 'Note',
     conversion: {
       heading: (base: string) => `In ${base}`,
@@ -193,7 +229,7 @@ export const strings = {
       noRate: 'No exchange rate is available for this currency yet. Enter the rate you used.',
       loading: 'Fetching the latest rate…',
     },
-    save: { expense: 'Save expense', income: 'Save income' },
+    save: { expense: 'Save expense', income: 'Save income', savings: 'Save to savings', investment: 'Save investment' },
     saveChanges: 'Save changes',
     delete: 'Delete',
     errors: {
@@ -394,7 +430,12 @@ export const strings = {
     showLabel: (name: string) => `Show ${name}`,
     hidden: 'Hidden',
     hiddenHint: 'Hidden categories stay on past transactions but are not offered when adding new ones.',
-    sections: { expense: 'Expense categories', income: 'Income categories' },
+    sections: {
+      expense: 'Expense categories',
+      income: 'Income categories',
+      savings: 'Savings categories',
+      investment: 'Investment categories',
+    },
     editor: {
       addTitle: 'New category',
       editTitle: 'Edit category',
@@ -452,6 +493,9 @@ export const strings = {
       coins: 'Money',
       'piggy-bank': 'Savings',
       'trending-up': 'Investments',
+      'chart-candlestick': 'Stocks',
+      'shield-check': 'Emergency fund',
+      sunset: 'Retirement',
       sparkles: 'Other',
       tag: 'Tag',
       'hand-coins': 'Lent or repaid',
@@ -464,6 +508,14 @@ export const strings = {
     signedInAs: 'Signed in as',
     displayName: 'Name',
     displayNameHint: 'Shown in the app only.',
+    photo: {
+      add: 'Add photo',
+      change: 'Change photo',
+      remove: 'Remove photo',
+      hint: 'Shown in the app only. Resized on your device; location and other photo details are removed.',
+      saved: 'Photo updated',
+      removed: 'Photo removed',
+    },
     saveName: 'Save name',
     nameSaved: 'Name saved',
     email: 'Email',
@@ -514,8 +566,8 @@ export const strings = {
       {
         title: 'What we store',
         items: [
-          'Your email address and, if you add one, your name, to sign you in and show your account.',
-          'What you enter: transactions (amounts, dates, payees, notes), categories, budgets, IOUs and repayments, and recurring transactions.',
+          'Your email address and, if you add them, your name and a profile photo, to sign you in and show your account. A photo is shrunk to a small square on your device first, which also removes its location and other details.',
+          'What you enter: transactions (expenses, income, savings and investments: amounts, dates, payees, notes), categories, budgets, IOUs and repayments, and recurring transactions.',
           'Your settings: base currency, theme, and your time zone, so recurring entries are added on the right day.',
         ],
       },
@@ -567,6 +619,8 @@ export const strings = {
     // Keys are Supabase Auth error codes, Postgres error codes, and the machine-readable
     // messages raised by our SQL.
     byCode: {
+      avatar_unreadable: 'That image couldn’t be read. Try a JPEG or PNG photo.',
+      avatar_too_large: 'That image is too detailed to use. Try a different photo.',
       invalid_credentials: 'Email or password is incorrect.',
       email_not_confirmed: 'Confirm your email first. Check your inbox for the link.',
       user_already_exists: 'An account with this email already exists. Try signing in.',

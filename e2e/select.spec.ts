@@ -36,7 +36,7 @@ test('dropdowns: keyboard, type-ahead, outside click, groups, and Escape inside 
   await category.click();
   const categoryList = page.getByRole('listbox', { name: f.category });
   await expect(categoryList.getByRole('group', { name: strings.categories.sections.expense })).toBeVisible();
-  expect(await categoryList.evaluate((el) => el.matches(':popover-open'))).toBe(true);
+  expect(await categoryList.evaluate((el) => el.closest('[popover]')?.matches(':popover-open') ?? false)).toBe(true);
   const axe = await new AxeBuilder({ page }).include('[role="listbox"]').analyze();
   expect(axe.violations.map((v) => v.id)).toEqual([]);
 

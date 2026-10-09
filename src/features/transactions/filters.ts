@@ -1,11 +1,12 @@
 import { addMonths, monthOf, monthRange, todayLocal, type IsoDate } from '@/domain/dates';
 import type { TransactionFilters } from './api';
+import type { TransactionType } from './kinds';
 
 export type DatePreset = 'all' | 'thisMonth' | 'lastMonth' | 'last3Months' | 'custom';
 
 export type FilterState = {
   search: string;
-  type: '' | 'expense' | 'income';
+  type: '' | TransactionType;
   categoryId: string;
   datePreset: DatePreset;
   customFrom: IsoDate;

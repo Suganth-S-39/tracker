@@ -5,17 +5,19 @@ type Option<T extends string> = { value: T; label: string };
 
 type SegmentedControlProps<T extends string> = {
   label: string;
+  /** Keep the label for screen readers only (when the options speak for themselves). */
+  hideLabel?: boolean;
   value: T;
   options: ReadonlyArray<Option<T>>;
   onChange: (value: T) => void;
 };
 
 /** A row of mutually exclusive choices, built on native radios for keyboard and screen readers. */
-export function SegmentedControl<T extends string>({ label, value, options, onChange }: SegmentedControlProps<T>) {
+export function SegmentedControl<T extends string>({ label, hideLabel = false, value, options, onChange }: SegmentedControlProps<T>) {
   const name = useId();
   return (
     <fieldset>
-      <legend className="mb-2 text-sm font-medium">{label}</legend>
+      <legend className={hideLabel ? 'sr-only' : 'mb-2 text-sm font-medium'}>{label}</legend>
       <div className="grid auto-cols-fr grid-flow-col gap-1 rounded-full bg-control p-1">
         {options.map((option) => (
           <label

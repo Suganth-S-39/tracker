@@ -33,7 +33,7 @@ function ShellLayout() {
       <Sidebar onAdd={() => editor.openCreate()} addDisabled={!online} />
       <div className="wide:pl-60">
         <OfflineBanner />
-        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl px-4 pb-28 outline-none wide:px-8 wide:pt-6 wide:pb-12">
+        <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl px-4 pt-page pb-28 outline-none wide:px-8 wide:pb-12">
           <Outlet />
         </main>
       </div>

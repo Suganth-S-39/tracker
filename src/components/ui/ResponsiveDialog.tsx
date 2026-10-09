@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { strings } from '@/strings/en';
 
 /**
@@ -23,6 +23,57 @@ function useScrollLock(locked: boolean) {
       if (--scrollLocks === 0) document.documentElement.style.overflow = '';
     };
   }, [locked]);
+}
+
+/** Less than this much of the page hidden below the visible area is browser chrome, not a keyboard. */
+const KEYBOARD_MIN_PX = 80;
+/** Space kept between a lifted sheet and the top of the screen. */
+const LIFT_TOP_GAP_PX = 12;
+
+type KeyboardLift = { inset: number; visibleHeight: number };
+
+/**
+ * Keeps a bottom sheet above the phone's on-screen keyboard (owner report, 2026-10-10: the sheet
+ * stayed behind the keyboard). The keyboard shrinks only the visual viewport, not the page, so a
+ * sheet fixed to the bottom of the page sits behind it, and with page scrolling locked the
+ * browser can't bring the field into view. While the keyboard is up, the sheet is lifted by the
+ * covered height (a translate, animated on the compositor) and capped to what's visible, and the
+ * field being typed in is scrolled into view inside it. Pinch-zoom isn't mistaken for a keyboard.
+ */
+function useKeyboardLift(open: boolean): KeyboardLift | null {
+  const [lift, setLift] = useState<KeyboardLift | null>(null);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!open || !viewport) return;
+    let frame = 0;
+    let wasUp = false;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const inset = Math.round(window.innerHeight - viewport.height - viewport.offsetTop);
+        const up = Math.abs(viewport.scale - 1) < 0.01 && inset > KEYBOARD_MIN_PX;
+        setLift(up ? { inset, visibleHeight: Math.round(viewport.height) } : null);
+        if (up && !wasUp) {
+          // Once the sheet has moved, bring the field being typed in into view inside it.
+          requestAnimationFrame(() => {
+            const field = document.activeElement;
+            if (field instanceof HTMLElement && field.closest('[role="dialog"]')) field.scrollIntoView({ block: 'nearest' });
+          });
+        }
+        wasUp = up;
+      });
+    };
+    measure();
+    viewport.addEventListener('resize', measure);
+    viewport.addEventListener('scroll', measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      viewport.removeEventListener('resize', measure);
+      viewport.removeEventListener('scroll', measure);
+      setLift(null);
+    };
+  }, [open]);
+  return open ? lift : null;
 }
 
 type ResponsiveDialogProps = {
@@ -81,6 +132,7 @@ function focusMarkedElement(event: Event) {
  */
 export function ResponsiveDialog({ open, onOpenChange, title, description, children }: ResponsiveDialogProps) {
   useScrollLock(open);
+  const lift = useKeyboardLift(open);
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -95,9 +147,16 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, child
         <Dialog.Content
           onOpenAutoFocus={focusMarkedElement}
           onEscapeKeyDown={ignoreEscapeForOpenSelect}
+          style={
+            lift
+              ? ({ '--keyboard-inset': `${lift.inset}px`, maxHeight: `${lift.visibleHeight - LIFT_TOP_GAP_PX}px` } as CSSProperties)
+              : undefined
+          }
           className={
             // Opaque surface (no blur) and clipped to its corners: see surface-sheet in index.css.
             'surface-sheet fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col overflow-hidden rounded-t-card pb-safe ' +
+            // Lifted above an on-screen keyboard (see useKeyboardLift); wide screens keep their centering.
+            'translate-y-[calc(var(--keyboard-inset,0px)*-1)] transition-[translate] duration-150 ease-out ' +
             'data-[state=closed]:animate-sheet-out data-[state=open]:animate-sheet-in ' +
             'wide:inset-x-auto wide:bottom-auto wide:left-1/2 wide:top-1/2 wide:w-[calc(100%-2rem)] wide:max-w-lg ' +
             'wide:-translate-x-1/2 wide:-translate-y-1/2 wide:rounded-card wide:pb-0 ' +
@@ -121,7 +180,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, child
           </div>
           {/* min-h-0 lets this flex child shrink, so long forms scroll inside the dialog. Its own
               opaque background lets the browser scroll it as a cached layer (smooth at any zoom). */}
-          <div className="min-h-0 overflow-y-auto overscroll-contain bg-surface px-5 pt-4 pb-5">{children}</div>
+          <div className="scrollbar-subtle min-h-0 overflow-y-auto overscroll-contain bg-surface px-5 pt-4 pb-5 wide:mr-1 wide:mb-3">{children}</div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

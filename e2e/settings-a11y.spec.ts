@@ -91,6 +91,7 @@ for (const scheme of ['light', 'dark'] as const) {
     const screens: Array<[string, string]> = [
       ['/', strings.pages.home.title],
       ['/transactions', strings.pages.transactions.title],
+      ['/transactions?view=calendar', strings.pages.transactions.title],
       ['/budgets', strings.pages.budgets.title],
       ['/reports', strings.pages.reports.title],
       ['/ious', strings.pages.ious.title],

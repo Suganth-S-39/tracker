@@ -13,12 +13,19 @@ test('new user signs up, confirms email, picks a base currency and lands in the 
   // First run: base currency defaults from the browser locale (en-US -> USD).
   await expect(page.getByRole('combobox', { name: strings.onboarding.currencyLabel })).toContainText('USD');
   await pickFromList(page, strings.onboarding.currencyLabel, /^INR ·/);
+  // The name is required.
+  await page.getByRole('button', { name: strings.onboarding.submit }).click();
+  await expect(page.getByText(strings.onboarding.nameRequired)).toBeVisible();
+  await expect(page.getByLabel(strings.onboarding.nameLabel)).toBeFocused();
+  await page.getByLabel(strings.onboarding.nameLabel).fill('Sam Rivera');
   await page.getByRole('button', { name: strings.onboarding.submit }).click();
 
   await expect(page).toHaveURL(/\/$/);
   // A brand-new account is greeted and guided to its first transaction.
   await expect(page.getByRole('heading', { name: strings.home.welcomeTitle })).toBeVisible();
   await expect(page.getByRole('button', { name: strings.home.addFirst })).toBeVisible();
+  // ...and the name from setup shows as the initial in the Settings link.
+  await expect(page.getByRole('link', { name: strings.nav.openSettings })).toContainText('S');
 });
 
 test('responsive shell, add dialog, theme and sign out', async ({ page, isMobile }, testInfo) => {

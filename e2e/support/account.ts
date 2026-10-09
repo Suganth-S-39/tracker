@@ -24,6 +24,7 @@ export async function signUpAndConfirm(page: Page, email: string): Promise<void>
 export async function newAccount(page: Page, testInfo: TestInfo, baseCurrency = 'INR'): Promise<string> {
   const email = uniqueEmail('e2e', testInfo);
   await signUpAndConfirm(page, email);
+  await page.getByLabel(strings.onboarding.nameLabel).fill('Alex Morgan');
   await pickFromList(page, strings.onboarding.currencyLabel, new RegExp(`^${baseCurrency} ·`));
   await page.getByRole('button', { name: strings.onboarding.submit }).click();
   await expect(page.getByRole('heading', { name: strings.pages.home.title, level: 1 })).toBeAttached();

@@ -85,6 +85,7 @@ try {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await page.getByLabel('Your name').fill('Lighthouse');
   await page.getByRole('button', { name: 'Get started' }).click();
   await page.getByRole('heading', { name: 'Home', level: 1 }).waitFor({ state: 'attached' });
 

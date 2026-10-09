@@ -78,8 +78,8 @@ select results_eq(
 );
 select is(
   (select count(*)::int from public.categories where not is_system and is_default),
-  9,
-  'onboarding creates the nine starter categories'
+  16,
+  'onboarding creates the 16 starter categories (expense, income, savings, investment)'
 );
 select throws_ok(
   $$ select public.complete_onboarding('USD', 'UTC') $$,
