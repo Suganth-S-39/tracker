@@ -124,7 +124,19 @@
   box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-card);
 }
 
-/* Denser glass for dialogs, sheets and navigation bars, where long text sits on top. */
+/*
+ * Dialogs and bottom sheets: an opaque raised surface, no blur. They cover most of the screen, so
+ * a backdrop blur would be redrawn on every frame of the slide-in and of scrolling inside them,
+ * and the page behind them is dimmed anyway. Opaque also lets the browser scroll their content as
+ * a cached layer.
+ */
+@utility surface-sheet {
+  background-color: var(--surface);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-raised);
+}
+
+/* Denser glass for small floating prompts and navigation bars, where text sits on top. */
 @utility glass-strong {
   background-color: var(--glass-strong);
   -webkit-backdrop-filter: blur(28px) saturate(180%);
@@ -133,11 +145,12 @@
   box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 0 0.5px var(--glass-edge), var(--shadow-raised);
 }
 
-/* Navigation bars: dense glass without the floating shadow. */
+/* Navigation bars: dense glass without the floating shadow. The one blur redrawn while any page
+   scrolls, so its radius stays modest (the dense tint does most of the frosting). */
 @utility glass-bar {
   background-color: var(--glass-strong);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
 /* The desktop sidebar: same tint as the bars, no blur (nothing ever scrolls behind it). */

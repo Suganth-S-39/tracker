@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { Card } from '@/components/ui/Card';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Stale } from '@/components/ui/Stale';
 import { categoryLabel, useCategoryMap } from '@/features/categories/api';
 import type { MoneyContext } from '@/features/money/useMoney';
 import { formatMonth, type MonthKey } from '@/domain/dates';
@@ -92,7 +93,7 @@ export function BudgetSnapshot({ month, money }: { month: MonthKey; money: Money
             {s.open}
           </Link>
         </div>
-        {body}
+        <Stale stale={status.isPlaceholderData}>{body}</Stale>
       </section>
     </Card>
   );

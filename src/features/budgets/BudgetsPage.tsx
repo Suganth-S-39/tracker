@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { ResponsiveDialog } from '@/components/ui/ResponsiveDialog';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Stale } from '@/components/ui/Stale';
 import { CategoryIcon } from '@/features/categories/CategoryIcon';
 import { categoryLabel, useCategories, useCategoryMap } from '@/features/categories/api';
 import { useMoney } from '@/features/money/useMoney';
@@ -162,7 +163,7 @@ export function BudgetsPage() {
     <>
       <PageHeader title={strings.pages.budgets.title} actions={<MonthSelector />} />
       <p className="mb-4 text-sm text-fg-muted">{s.carryHint}</p>
-      {body}
+      <Stale stale={status.isPlaceholderData}>{body}</Stale>
 
       <ResponsiveDialog
         open={editor.open}

@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Stale } from '@/components/ui/Stale';
 import { Switch } from '@/components/ui/Switch';
 import { useCategoryMap } from '@/features/categories/api';
 import { useMoney } from '@/features/money/useMoney';
@@ -45,22 +46,24 @@ export function ReportsPage() {
             <h2 id={donutHeading} className="mb-5 text-xl font-bold">
               {s.byCategory}
             </h2>
-            {(spending.isError && spending.data === undefined) ? (
-              <ErrorState error={spending.error} onRetry={() => void spending.refetch()} />
-            ) : spending.isPending || !money ? (
-              <div className="flex flex-col items-center gap-6 wide:flex-row" aria-busy="true">
-                <Skeleton className="size-52 rounded-full" />
-                <div className="flex w-full flex-col gap-3">
-                  <Skeleton className="h-8" />
-                  <Skeleton className="h-8" />
-                  <Skeleton className="h-8" />
+            <Stale stale={spending.isPlaceholderData}>
+              {(spending.isError && spending.data === undefined) ? (
+                <ErrorState error={spending.error} onRetry={() => void spending.refetch()} />
+              ) : spending.isPending || !money ? (
+                <div className="flex flex-col items-center gap-6 wide:flex-row" aria-busy="true">
+                  <Skeleton className="size-52 rounded-full" />
+                  <div className="flex w-full flex-col gap-3">
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                    <Skeleton className="h-8" />
+                  </div>
                 </div>
-              </div>
-            ) : spending.data.length === 0 ? (
-              <EmptyState icon={ChartPie} title={s.emptyTitle(monthName)} body={s.emptyBody} />
-            ) : (
-              <CategoryDonut spending={spending.data} categories={categories} money={money} monthName={monthName} />
-            )}
+              ) : spending.data.length === 0 ? (
+                <EmptyState icon={ChartPie} title={s.emptyTitle(monthName)} body={s.emptyBody} />
+              ) : (
+                <CategoryDonut spending={spending.data} categories={categories} money={money} monthName={monthName} />
+              )}
+            </Stale>
           </section>
         </Card>
 
@@ -70,15 +73,17 @@ export function ReportsPage() {
               {s.incomeVsExpenses}
             </h2>
             <p className="mb-4 text-sm text-fg-muted">{s.incomeVsExpensesHint}</p>
-            {(monthly.isError && monthly.data === undefined) ? (
-              <ErrorState error={monthly.error} onRetry={() => void monthly.refetch()} />
-            ) : monthly.isPending || !money ? (
-              <Skeleton className="h-60" />
-            ) : monthly.data.every((m) => m.incomeMinor === 0 && m.expenseMinor === 0) ? (
-              <p className="py-8 text-center text-fg-muted">{s.noActivity}</p>
-            ) : (
-              <MonthlyBars months={monthly.data} selected={month} onSelect={setMonth} money={money} />
-            )}
+            <Stale stale={monthly.isPlaceholderData}>
+              {(monthly.isError && monthly.data === undefined) ? (
+                <ErrorState error={monthly.error} onRetry={() => void monthly.refetch()} />
+              ) : monthly.isPending || !money ? (
+                <Skeleton className="h-60" />
+              ) : monthly.data.every((m) => m.incomeMinor === 0 && m.expenseMinor === 0) ? (
+                <p className="py-8 text-center text-fg-muted">{s.noActivity}</p>
+              ) : (
+                <MonthlyBars months={monthly.data} selected={month} onSelect={setMonth} money={money} />
+              )}
+            </Stale>
           </section>
         </Card>
       </div>

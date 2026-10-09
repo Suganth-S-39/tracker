@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Stale } from '@/components/ui/Stale';
 import { useCategoryMap } from '@/features/categories/api';
 import type { MoneyContext } from '@/features/money/useMoney';
 import { useHasAnyTransactions, useRecentTransactions } from '@/features/transactions/api';
@@ -87,7 +88,7 @@ export function RecentTransactions({ month, money }: { month: MonthKey; money: M
             {strings.home.seeAll}
           </Link>
         </div>
-        {body}
+        <Stale stale={recent.isPlaceholderData}>{body}</Stale>
       </section>
     </Card>
   );

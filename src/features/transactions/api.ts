@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -52,6 +53,8 @@ async function listTransactions(filters: TransactionFilters, limit: number, curs
 export function useTransactionPages(filters: TransactionFilters) {
   return useInfiniteQuery({
     queryKey: queryKeys.transactions.list(filters),
+    // Changing a filter keeps the current list on screen (dimmed) until the new results arrive.
+    placeholderData: keepPreviousData,
     initialPageParam: null as Cursor | null,
     queryFn: ({ pageParam }) => listTransactions(filters, PAGE_SIZE, pageParam),
     getNextPageParam: (lastPage): Cursor | undefined => {
@@ -66,6 +69,9 @@ export function useTransactionPages(filters: TransactionFilters) {
 export function useRecentTransactions(month: MonthKey, limit = 5) {
   return useQuery({
     queryKey: queryKeys.transactions.recent(month),
+    // Switching month keeps the current content on screen (dimmed) until the new month loads,
+    // instead of flashing loading placeholders.
+    placeholderData: keepPreviousData,
     queryFn: () => {
       const { first, last } = monthRange(month);
       return listTransactions({ from: first, to: last }, limit, null);
@@ -87,6 +93,9 @@ export type MonthSummary = { income_minor: number; expense_minor: number; net_mi
 export function useMonthSummary(month: MonthKey) {
   return useQuery({
     queryKey: queryKeys.transactions.summary(month),
+    // Switching month keeps the current content on screen (dimmed) until the new month loads,
+    // instead of flashing loading placeholders.
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<MonthSummary> => {
       const { data, error } = await supabase.rpc('month_summary', { p_month: `${month}-01` });
       if (error) throw error;

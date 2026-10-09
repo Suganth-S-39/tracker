@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type { MonthKey } from '@/domain/dates';
 import { queryKeys } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
@@ -10,6 +10,9 @@ export type MonthTotals = { month: MonthKey; incomeMinor: number; expenseMinor: 
 export function useSpendingByCategory(month: MonthKey, excludeIou: boolean) {
   return useQuery({
     queryKey: queryKeys.transactions.byCategory(month, excludeIou),
+    // Switching month keeps the current content on screen (dimmed) until the new month loads,
+    // instead of flashing loading placeholders.
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<CategorySpending[]> => {
       const { data, error } = await supabase.rpc('spending_by_category', {
         p_month: `${month}-01`,
@@ -25,6 +28,9 @@ export function useSpendingByCategory(month: MonthKey, excludeIou: boolean) {
 export function useMonthlyTotals(from: MonthKey, to: MonthKey, excludeIou: boolean) {
   return useQuery({
     queryKey: queryKeys.transactions.monthly(from, to, excludeIou),
+    // Switching month keeps the current content on screen (dimmed) until the new month loads,
+    // instead of flashing loading placeholders.
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<MonthTotals[]> => {
       const { data, error } = await supabase.rpc('monthly_totals', {
         p_from_month: `${from}-01`,

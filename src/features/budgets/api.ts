@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { MonthKey } from '@/domain/dates';
 import { queryKeys } from '@/lib/queryClient';
 import { supabase } from '@/lib/supabase';
@@ -16,6 +16,9 @@ export type BudgetStatus = {
 export function useBudgetStatus(month: MonthKey) {
   return useQuery({
     queryKey: queryKeys.transactions.budgets(month),
+    // Switching month keeps the current content on screen (dimmed) until the new month loads,
+    // instead of flashing loading placeholders.
+    placeholderData: keepPreviousData,
     queryFn: async (): Promise<BudgetStatus[]> => {
       const { data, error } = await supabase.rpc('budget_status', { p_month: `${month}-01` });
       if (error) throw error;

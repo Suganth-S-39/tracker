@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ErrorState } from '@/components/ui/ErrorState';
 import { TextField } from '@/components/ui/Field';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { Stale } from '@/components/ui/Stale';
 import { categoryLabel, useCategories, useCategoryMap } from '@/features/categories/api';
 import { useMoney } from '@/features/money/useMoney';
 import { cx } from '@/lib/cx';
@@ -197,16 +198,18 @@ export function TransactionsPage() {
             />
           )
         ) : (
-          <TransactionList
-            transactions={transactions}
-            categories={categoryMap}
-            money={money}
-            hasMore={pages.hasNextPage}
-            loadingMore={pages.isFetchingNextPage}
-            onLoadMore={() => void pages.fetchNextPage()}
-            onOpen={editor.openEdit}
-            onDelete={online ? deleteWithUndo : undefined}
-          />
+          <Stale stale={pages.isPlaceholderData}>
+            <TransactionList
+              transactions={transactions}
+              categories={categoryMap}
+              money={money}
+              hasMore={pages.hasNextPage && !pages.isPlaceholderData}
+              loadingMore={pages.isFetchingNextPage}
+              onLoadMore={() => void pages.fetchNextPage()}
+              onOpen={editor.openEdit}
+              onDelete={online ? deleteWithUndo : undefined}
+            />
+          </Stale>
         )}
       </Card>
     </>
