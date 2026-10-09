@@ -40,7 +40,7 @@ Run these in a terminal in `D:\tracker`. They use the Supabase CLI already insta
 
 1. Create a free account at https://vercel.com (sign in with GitHub is easiest).
 2. **Add New → Project**, import the GitHub repository. Keep the detected settings (`vercel.json` sets the build).
-3. Before the first deploy, open **Environment Variables** and add (all environments):
+3. Before the first deploy, open **Environment Variables** and add (Production and Preview; Vercel doesn't allow sensitive variables in Development):
 
    | Name | Value | Sensitive |
    |---|---|---|
