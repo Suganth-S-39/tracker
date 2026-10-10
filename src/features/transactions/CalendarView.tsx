@@ -23,6 +23,7 @@ import { formatAmountTiny, formatMoney } from '@/domain/money';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import { useDailyTotals, useTransactionPages, type DayTotals, type Transaction } from './api';
+import { isGoalManaged } from './kinds';
 import { TransactionRow } from './TransactionRow';
 
 const c = strings.transactions.calendar;
@@ -273,7 +274,7 @@ function DayTransactions({
                   category={categories.get(transaction.category_id)}
                   money={money}
                   onOpen={onOpen}
-                  onDelete={transaction.iou_id ? undefined : onDelete}
+                  onDelete={transaction.iou_id || isGoalManaged(transaction) ? undefined : onDelete}
                 />
               ))}
             </div>

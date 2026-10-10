@@ -10,6 +10,7 @@ export function preloadMainRoutes(): void {
       () => import('@/features/transactions/TransactionsPage'),
       () => import('@/features/budgets/BudgetsPage'),
       () => import('@/features/reports/ReportsPage'),
+      () => import('@/features/goals/GoalsPage'),
       () => import('@/features/settings/SettingsPage'),
     ]) {
       preload().catch(() => {});

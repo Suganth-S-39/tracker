@@ -95,6 +95,7 @@ for (const scheme of ['light', 'dark'] as const) {
       ['/budgets', strings.pages.budgets.title],
       ['/reports', strings.pages.reports.title],
       ['/ious', strings.pages.ious.title],
+      ['/goals', strings.pages.goals.title],
       ['/settings', strings.pages.settings.title],
       ['/settings/categories', strings.pages.categories.title],
       ['/settings/recurring', strings.recurring.title],

@@ -6,6 +6,7 @@ import type { MoneyContext } from '@/features/money/useMoney';
 import { formatDayHeading, todayLocal } from '@/domain/dates';
 import { strings } from '@/strings/en';
 import type { Transaction } from './api';
+import { isGoalManaged } from './kinds';
 import { TRANSACTION_ROW_HEIGHT, TransactionRow } from './TransactionRow';
 
 /** A day heading's rendered height (pt-4 + pb-1.5 + one 20px line), so estimates are exact. */
@@ -109,7 +110,8 @@ export function TransactionList(props: TransactionListProps) {
                   category={categories.get(item.transaction.category_id)}
                   money={money}
                   onOpen={open}
-                  onDelete={item.transaction.iou_id || !canDelete ? undefined : remove}
+                  // IOU and goal entries are removed through their IOU or goal.
+                  onDelete={item.transaction.iou_id || isGoalManaged(item.transaction) || !canDelete ? undefined : remove}
                 />
               )}
             </div>

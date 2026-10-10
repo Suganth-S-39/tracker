@@ -170,17 +170,18 @@ export function formatAmountTiny(minor: number, exponent: number, locale?: strin
 }
 
 /**
- * A transaction amount with its sign (the non-color cue): income positive; expenses, savings and
- * investments negative (money leaving the month's spending pool).
+ * A transaction amount with its sign (the non-color cue): income and money taken back out of a
+ * savings goal positive (back in the month's spending pool); expenses, savings and investments
+ * negative (leaving it).
  */
 export function formatSignedMoney(
-  type: 'expense' | 'income' | 'savings' | 'investment',
+  type: 'expense' | 'income' | 'savings' | 'investment' | 'withdrawal',
   minor: number,
   currency: string,
   exponent: number,
   locale?: string,
 ): string {
-  return formatMoney(type === 'income' ? minor : -minor, currency, exponent, {
+  return formatMoney(type === 'income' || type === 'withdrawal' ? minor : -minor, currency, exponent, {
     sign: 'exceptZero',
     ...(locale ? { locale } : {}),
   });

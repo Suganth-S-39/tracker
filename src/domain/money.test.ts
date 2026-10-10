@@ -161,6 +161,8 @@ describe('formatting', () => {
   it('shows savings and investments as money leaving the spending pool', () => {
     expect(formatSignedMoney('savings', 500000, 'INR', 2, 'en-IN')).toBe('-₹5,000.00');
     expect(formatSignedMoney('investment', 1000000, 'INR', 2, 'en-IN')).toBe('-₹10,000.00');
+    // Taken back out of a savings goal: back in the month's balance.
+    expect(formatSignedMoney('withdrawal', 50000, 'INR', 2, 'en-IN')).toBe('+₹500.00');
   });
 
   it('formats huge amounts exactly', () => {

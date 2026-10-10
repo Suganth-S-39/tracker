@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { BudgetSnapshot } from '@/features/budgets/BudgetSnapshot';
+import { GoalsCard } from '@/features/goals/GoalsCard';
 import { IouSummaryCard } from '@/features/ious/IouSummaryCard';
 import { useMoney } from '@/features/money/useMoney';
 import { MonthSelector } from '@/features/month/MonthSelector';
@@ -12,8 +13,9 @@ import { useProfile } from '@/features/profile/api';
 import { Avatar } from '@/features/profile/Avatar';
 
 /**
- * Home (spec section 8), top to bottom on phones: top bar, balance, IOU summary, budget snapshot,
- * recent transactions. Wide screens: balance and IOUs beside the budget, recent transactions below.
+ * Home (spec section 8), top to bottom on phones: top bar, balance, savings goals, IOU summary,
+ * budget snapshot, recent transactions. Wide screens: balance, goals and IOUs beside the budget,
+ * recent transactions below.
  */
 export function HomePage() {
   const money = useMoney();
@@ -38,6 +40,7 @@ export function HomePage() {
       <div className="mt-4 grid gap-4 wide:grid-cols-2 wide:items-start">
         <div className="flex flex-col gap-4">
           <HeroCard month={month} money={money} />
+          <GoalsCard money={money} />
           <IouSummaryCard money={money} />
         </div>
         <BudgetSnapshot month={month} money={money} />

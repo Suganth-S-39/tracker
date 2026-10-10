@@ -7,7 +7,7 @@ import { formatMoney, formatSignedMoney } from '@/domain/money';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import type { Transaction } from './api';
-import { AMOUNT_TEXT } from './kinds';
+import { AMOUNT_TEXT, isGoalManaged } from './kinds';
 
 type TransactionRowProps = {
   transaction: Transaction;
@@ -17,6 +17,8 @@ type TransactionRowProps = {
   onOpen: (transaction: Transaction) => void;
   /** Omit to show the row without delete (e.g. on Home). Stable, like onOpen. */
   onDelete?: ((transaction: Transaction) => void) | undefined;
+  /** "For <goal>" on savings into a goal; off on the goal's own page, where it goes without saying. */
+  showGoal?: boolean;
 };
 
 /** Every row is this tall (`min-h-16`), so the virtualized list's estimates are exact. */
@@ -30,10 +32,26 @@ const DRAG_START_PX = 8;
  * button on the row. Amounts carry a +/- sign so income and expense never rely on color alone.
  * Memoized: while the list scrolls, only rows whose data changed re-render.
  */
-export const TransactionRow = memo(function TransactionRow({ transaction, category, money, onOpen, onDelete }: TransactionRowProps) {
+export const TransactionRow = memo(function TransactionRow({
+  transaction,
+  category,
+  money,
+  onOpen,
+  onDelete,
+  showGoal = true,
+}: TransactionRowProps) {
   const label = category ? categoryLabel(category) : '';
-  const title = transaction.payee ?? label;
-  const subtitle = [transaction.payee ? label : null, transaction.note].filter(Boolean).join(' · ');
+  const goal = transaction.goal_name;
+  // Money taken out of a goal is named after the goal; savings into one say which.
+  const title = transaction.payee ?? (transaction.type === 'withdrawal' ? goal : null) ?? label;
+  const forGoal = showGoal && transaction.type === 'savings' && goal && goal !== title ? strings.transactions.forGoal(goal) : null;
+  const subtitle = [title !== label ? label : null, forGoal, transaction.note].filter(Boolean).join(' · ');
+  const tag =
+    transaction.type === 'savings' || transaction.type === 'investment' || transaction.type === 'withdrawal'
+      ? strings.transactions.kindTag[transaction.type]
+      : isGoalManaged(transaction)
+        ? strings.transactions.kindTag.purchase
+        : null;
   const amount = formatSignedMoney(
     transaction.type,
     transaction.original_amount_minor,
@@ -81,9 +99,7 @@ export const TransactionRow = memo(function TransactionRow({ transaction, catego
           </span>
           <span className="shrink-0 text-right">
             <span className={cx('block font-bold tabular', AMOUNT_TEXT[transaction.type])}>{amount}</span>
-            {transaction.type === 'savings' || transaction.type === 'investment' ? (
-              <span className="block text-xs font-semibold text-fg-muted">{strings.transactions.kindTag[transaction.type]}</span>
-            ) : null}
+            {tag ? <span className="block text-xs font-semibold text-fg-muted">{tag}</span> : null}
             {foreign ? (
               <span className="block text-xs text-fg-muted tabular">
                 {strings.transactions.convertedApprox(

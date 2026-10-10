@@ -1,4 +1,4 @@
-import { ArrowLeftRight, ChartPie, House, PiggyBank, type LucideIcon } from 'lucide-react';
+import { ArrowLeftRight, ChartPie, House, PiggyBank, Target, type LucideIcon } from 'lucide-react';
 import { strings } from '@/strings/en';
 
 export type NavItem = { to: string; label: string; icon: LucideIcon; end?: boolean };
@@ -13,3 +13,6 @@ export const rightNavItems: readonly NavItem[] = [
   { to: '/budgets', label: strings.nav.budgets, icon: PiggyBank },
   { to: '/reports', label: strings.nav.reports, icon: ChartPie },
 ];
+
+// Only in the sidebar: the bottom bar has no room, and phones reach Goals from Home.
+export const sidebarOnlyNavItems: readonly NavItem[] = [{ to: '/goals', label: strings.nav.goals, icon: Target }];

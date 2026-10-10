@@ -45,8 +45,8 @@ select results_eq(
 select results_eq(
   $$ select system_key::text, kind::text from public.categories
      where user_id = '11111111-1111-1111-1111-111111111111' and is_system order by system_key $$,
-  $$ values ('borrowed', 'income'), ('lent', 'expense'), ('repayment_paid', 'expense'), ('repayment_received', 'income') $$,
-  'signup creates the four reserved IOU categories'
+  $$ values ('borrowed', 'income'), ('goal_withdrawal', 'withdrawal'), ('lent', 'expense'), ('repayment_paid', 'expense'), ('repayment_received', 'income') $$,
+  'signup creates the four reserved IOU categories and the one for money taken out of goals'
 );
 select is(
   (select display_name from public.profiles where user_id = '22222222-2222-2222-2222-222222222222'),

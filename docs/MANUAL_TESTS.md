@@ -38,6 +38,14 @@ the production site after deploying (docs/SETUP.md). Note anything that fails an
 - [ ] **Keyboard (Android):** open Add: the sheet slides up without the keyboard. Tap Amount: the keyboard opens and the sheet sits right above it, with the field visible and no flicker. Tap the search on Transactions: the bottom bar steps aside while typing.
 - [ ] **Calendar:** Transactions → **Calendar**. Days show what was spent; tapping a day lists its transactions; the months change with the arrows. Comfortable to tap on your phone.
 
+## Savings goals (added 2026-10-10)
+
+- [ ] **Make one from Home:** "Saving up for something? Make a goal" opens the form. Add a name, what it costs, a date and a photo of it (camera or library). The goal page shows 0% and the photo.
+- [ ] **Add money** from the goal page: the Add sheet opens on Savings with the goal chosen. Save; the ring and Home's goal row move, and Home's Savings tile includes it.
+- [ ] **Take out** some: the balance on Home goes up by it, and the goal down. Try more than is in it: it's refused.
+- [ ] **I bought it!**: the form shows how much comes from the goal and how much from your balance; after saving, a small confetti burst plays (none with Reduce motion), Reports shows the purchase, and Budgets don't count it. **Not bought yet** puts the money back.
+- [ ] Scroll Home and the goal page on your phone: as smooth as the rest of the app.
+
 ## Things that need a day to pass
 
 - [ ] **Exchange rates:** the day after deploying, the Add form's conversion shows a rate dated that day (or the latest working day). In Vercel, **Settings → Cron Jobs** shows the run succeeded.

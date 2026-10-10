@@ -34,6 +34,11 @@ export function addDays(date: IsoDate, days: number): IsoDate {
   return fromUtc(d);
 }
 
+/** Whole days from one date to another: (2026-10-01, 2026-10-08) -> 7; negative when `to` is earlier. */
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return Math.round((toUtc(to).getTime() - toUtc(from).getTime()) / 86_400_000);
+}
+
 export function monthOf(date: IsoDate): MonthKey {
   return date.slice(0, 7);
 }

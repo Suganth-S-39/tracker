@@ -9,6 +9,7 @@ export type Database = {
                   Row: {
                     "amount_minor": number,"category_id": string | null,"created_at": string,"deleted_at": string | null,"id": string,"month": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "amount_minor": number,"category_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"month": string,"updated_at"?: string,"user_id"?: string
                   }
@@ -28,6 +29,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"deleted_at": string | null,"icon": string,"id": string,"is_default": boolean,"is_hidden": boolean,"is_system": boolean,"kind": Database["public"]['Enums']["transaction_type"],"name": string,"sort_order": number,"system_key": Database["public"]['Enums']["system_category_key"] | null,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"deleted_at"?: string | null,"icon"?: string,"id"?: string,"is_default"?: boolean,"is_hidden"?: boolean,"is_system"?: boolean,"kind": Database["public"]['Enums']["transaction_type"],"name": string,"sort_order"?: number,"system_key"?: Database["public"]['Enums']["system_category_key"] | null,"updated_at"?: string,"user_id"?: string
                   }
@@ -41,6 +43,7 @@ isOneToOne: false
                   Row: {
                     "code": string,"exponent": number,"name": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "code": string,"exponent": number,"name": string
                   }
@@ -54,6 +57,7 @@ isOneToOne: false
                   Row: {
                     "base": string,"date": string,"id": string,"quote": string,"rate": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "base": string,"date": string,"id"?: string,"quote": string,"rate": number
                   }
@@ -75,10 +79,37 @@ isOneToOne: false
       referencedColumns: ["code"]
     }
                   ]
+                },"goals": {
+                  Row: {
+                    "bought_on": string | null,"closing_transaction_id": string | null,"created_at": string,"deleted_at": string | null,"icon": string,"id": string,"name": string,"photo_data_url": string | null,"purchase_transaction_id": string | null,"target_date": string | null,"target_minor": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bought_on"?: string | null,"closing_transaction_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"icon"?: string,"id"?: string,"name": string,"photo_data_url"?: string | null,"purchase_transaction_id"?: string | null,"target_date"?: string | null,"target_minor": number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "bought_on"?: string | null,"closing_transaction_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"icon"?: string,"id"?: string,"name"?: string,"photo_data_url"?: string | null,"purchase_transaction_id"?: string | null,"target_date"?: string | null,"target_minor"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "goals_closing_fkey"
+      columns: ["user_id","closing_transaction_id"]
+isOneToOne: false
+      referencedRelation: "transactions"
+      referencedColumns: ["user_id","id"]
+    },{
+      foreignKeyName: "goals_purchase_fkey"
+      columns: ["user_id","purchase_transaction_id"]
+isOneToOne: false
+      referencedRelation: "transactions"
+      referencedColumns: ["user_id","id"]
+    }
+                  ]
                 },"iou_repayments": {
                   Row: {
                     "amount_minor": number,"base_amount_minor": number,"created_at": string,"currency": string,"date": string,"deleted_at": string | null,"exchange_rate": number,"id": string,"iou_currency_amount_minor": number,"iou_currency_rate": number,"iou_id": string,"note": string | null,"transaction_id": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "amount_minor": number,"base_amount_minor": number,"created_at"?: string,"currency": string,"date": string,"deleted_at"?: string | null,"exchange_rate": number,"id"?: string,"iou_currency_amount_minor": number,"iou_currency_rate": number,"iou_id": string,"note"?: string | null,"transaction_id": string,"updated_at"?: string,"user_id"?: string
                   }
@@ -110,6 +141,7 @@ isOneToOne: false
                   Row: {
                     "base_amount_minor": number,"created_at": string,"date": string,"deleted_at": string | null,"direction": Database["public"]['Enums']["iou_direction"],"due_date": string | null,"exchange_rate": number,"id": string,"note": string | null,"original_amount_minor": number,"original_currency": string,"person_name": string,"transaction_id": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "base_amount_minor": number,"created_at"?: string,"date": string,"deleted_at"?: string | null,"direction": Database["public"]['Enums']["iou_direction"],"due_date"?: string | null,"exchange_rate": number,"id"?: string,"note"?: string | null,"original_amount_minor": number,"original_currency": string,"person_name": string,"transaction_id": string,"updated_at"?: string,"user_id"?: string
                   }
@@ -135,6 +167,7 @@ isOneToOne: false
                   Row: {
                     "accent_theme": Database["public"]['Enums']["accent_theme"],"avatar_data_url": string | null,"base_currency": string | null,"created_at": string,"deleted_at": string | null,"display_name": string | null,"email": string | null,"id": string,"theme_mode": Database["public"]['Enums']["theme_mode"],"timezone": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "accent_theme"?: Database["public"]['Enums']["accent_theme"],"avatar_data_url"?: string | null,"base_currency"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"display_name"?: string | null,"email"?: string | null,"id"?: string,"theme_mode"?: Database["public"]['Enums']["theme_mode"],"timezone"?: string,"updated_at"?: string,"user_id"?: string
                   }
@@ -154,6 +187,7 @@ isOneToOne: false
                   Row: {
                     "amount_minor": number,"anchor_day": number,"category_id": string,"created_at": string,"currency": string,"deleted_at": string | null,"frequency": Database["public"]['Enums']["recurrence_frequency"],"id": string,"is_active": boolean,"next_due_date": string,"note": string | null,"payee": string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "amount_minor": number,"anchor_day": number,"category_id": string,"created_at"?: string,"currency": string,"deleted_at"?: string | null,"frequency": Database["public"]['Enums']["recurrence_frequency"],"id"?: string,"is_active"?: boolean,"next_due_date": string,"note"?: string | null,"payee"?: string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at"?: string,"user_id"?: string
                   }
@@ -177,13 +211,14 @@ isOneToOne: false
                   ]
                 },"transactions": {
                   Row: {
-                    "base_amount_minor": number,"category_id": string,"created_at": string,"date": string,"deleted_at": string | null,"exchange_rate": number,"id": string,"iou_id": string | null,"note": string | null,"occurrence_date": string | null,"original_amount_minor": number,"original_currency": string,"payee": string | null,"recurring_rule_id": string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at": string,"user_id": string
+                    "base_amount_minor": number,"category_id": string,"created_at": string,"date": string,"deleted_at": string | null,"exchange_rate": number,"goal_id": string | null,"id": string,"iou_id": string | null,"note": string | null,"occurrence_date": string | null,"original_amount_minor": number,"original_currency": string,"payee": string | null,"recurring_rule_id": string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
-                    "base_amount_minor": number,"category_id": string,"created_at"?: string,"date": string,"deleted_at"?: string | null,"exchange_rate": number,"id"?: string,"iou_id"?: string | null,"note"?: string | null,"occurrence_date"?: string | null,"original_amount_minor": number,"original_currency": string,"payee"?: string | null,"recurring_rule_id"?: string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at"?: string,"user_id"?: string
+                    "base_amount_minor": number,"category_id": string,"created_at"?: string,"date": string,"deleted_at"?: string | null,"exchange_rate": number,"goal_id"?: string | null,"id"?: string,"iou_id"?: string | null,"note"?: string | null,"occurrence_date"?: string | null,"original_amount_minor": number,"original_currency": string,"payee"?: string | null,"recurring_rule_id"?: string | null,"type": Database["public"]['Enums']["transaction_type"],"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "base_amount_minor"?: number,"category_id"?: string,"created_at"?: string,"date"?: string,"deleted_at"?: string | null,"exchange_rate"?: number,"id"?: string,"iou_id"?: string | null,"note"?: string | null,"occurrence_date"?: string | null,"original_amount_minor"?: number,"original_currency"?: string,"payee"?: string | null,"recurring_rule_id"?: string | null,"type"?: Database["public"]['Enums']["transaction_type"],"updated_at"?: string,"user_id"?: string
+                    "base_amount_minor"?: number,"category_id"?: string,"created_at"?: string,"date"?: string,"deleted_at"?: string | null,"exchange_rate"?: number,"goal_id"?: string | null,"id"?: string,"iou_id"?: string | null,"note"?: string | null,"occurrence_date"?: string | null,"original_amount_minor"?: number,"original_currency"?: string,"payee"?: string | null,"recurring_rule_id"?: string | null,"type"?: Database["public"]['Enums']["transaction_type"],"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -191,6 +226,12 @@ isOneToOne: false
       columns: ["user_id","category_id"]
 isOneToOne: false
       referencedRelation: "categories"
+      referencedColumns: ["user_id","id"]
+    },{
+      foreignKeyName: "transactions_goal_fkey"
+      columns: ["user_id","goal_id"]
+isOneToOne: false
+      referencedRelation: "goals"
       referencedColumns: ["user_id","id"]
     },{
       foreignKeyName: "transactions_iou_fkey"
@@ -219,6 +260,7 @@ isOneToOne: false
                   Row: {
                     "base_amount_minor": number | null,"created_at": string | null,"date": string | null,"direction": Database["public"]['Enums']["iou_direction"] | null,"due_date": string | null,"exchange_rate": string | null,"id": string | null,"note": string | null,"original_amount_minor": number | null,"original_currency": string | null,"person_name": string | null,"remaining_minor": number | null,"repaid_minor": number | null,"repayment_count": number | null,"status": string | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     {
       foreignKeyName: "ious_original_currency_fkey"
@@ -232,6 +274,7 @@ isOneToOne: false
                   Row: {
                     "amount_minor": number | null,"base_amount_minor": number | null,"created_at": string | null,"currency": string | null,"date": string | null,"exchange_rate": string | null,"id": string | null,"iou_currency_amount_minor": number | null,"iou_currency_rate": string | null,"iou_id": string | null,"note": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                            "amount_minor"?: number | null,"base_amount_minor"?: number | null,"created_at"?: string | null,"currency"?: string | null,"date"?: string | null,"exchange_rate"?: never,"id"?: string | null,"iou_currency_amount_minor"?: number | null,"iou_currency_rate"?: never,"iou_id"?: string | null,"note"?: string | null
                          }
@@ -254,6 +297,9 @@ isOneToOne: false
 { Args: { "p_month": string }; Returns: {
               "amount_minor": number,"category_id": string,"set_for_month": string,"spent_minor": number
             }[]
+                           },
+"complete_goal":
+{ Args: { "p_amount_minor": number,"p_category_id": string,"p_date": string,"p_goal_id": string,"p_note"?: string,"p_payee"?: string }; Returns: string
                            },
 "complete_onboarding":
 { Args: { "p_avatar_data_url"?: string,"p_base_currency": string,"p_display_name"?: string,"p_timezone": string }; Returns: {
@@ -283,7 +329,7 @@ isOneToOne: false
 { Args: { "p_amount_minor": number,"p_base_amount_minor": number,"p_currency": string,"p_date": string,"p_exchange_rate": string,"p_iou_currency_amount_minor": number,"p_iou_currency_rate": string,"p_iou_id": string,"p_note"?: string }; Returns: string
                            },
 "create_transaction":
-{ Args: { "p_base_amount_minor": number,"p_category_id": string,"p_date": string,"p_exchange_rate": string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_payee"?: string,"p_repeat"?: Database["public"]['Enums']["recurrence_frequency"],"p_type": Database["public"]['Enums']["transaction_type"] }; Returns: string
+{ Args: { "p_base_amount_minor": number,"p_category_id": string,"p_date": string,"p_exchange_rate": string,"p_goal_id"?: string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_payee"?: string,"p_repeat"?: Database["public"]['Enums']["recurrence_frequency"],"p_type": Database["public"]['Enums']["transaction_type"] }; Returns: string
                            },
 "daily_totals":
 { Args: { "p_exclude_iou"?: boolean,"p_month": string }; Returns: {
@@ -299,6 +345,11 @@ isOneToOne: false
 "delete_repayment":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"goal_list":
+{ Args: { "p_today": string }; Returns: {
+              "added_minor": number,"bought_on": string,"closing_transaction_id": string,"created_at": string,"first_added_on": string,"has_photo": boolean,"icon": string,"id": string,"name": string,"purchase_transaction_id": string,"recent_net_minor": number,"saved_minor": number,"spent_minor": number,"taken_minor": number,"target_date": string,"target_minor": number,"updated_at": string
+            }[]
+                           },
 "iou_totals":
 { Args: Record<PropertyKey, never>; Returns: {
               "i_owe_minor": number,"owe_approximate": boolean,"owed_approximate": boolean,"owed_to_me_minor": number
@@ -310,8 +361,8 @@ isOneToOne: false
             }[]
                            },
 "list_transactions":
-{ Args: { "p_category_id"?: string,"p_cursor_created_at"?: string,"p_cursor_date"?: string,"p_cursor_id"?: string,"p_from"?: string,"p_limit"?: number,"p_search"?: string,"p_to"?: string,"p_type"?: Database["public"]['Enums']["transaction_type"] }; Returns: {
-              "base_amount_minor": number,"category_id": string,"created_at": string,"date": string,"exchange_rate": string,"id": string,"iou_id": string,"note": string,"original_amount_minor": number,"original_currency": string,"payee": string,"recurring_rule_id": string,"type": Database["public"]['Enums']["transaction_type"]
+{ Args: { "p_category_id"?: string,"p_cursor_created_at"?: string,"p_cursor_date"?: string,"p_cursor_id"?: string,"p_from"?: string,"p_goal_id"?: string,"p_limit"?: number,"p_search"?: string,"p_to"?: string,"p_type"?: Database["public"]['Enums']["transaction_type"] }; Returns: {
+              "base_amount_minor": number,"category_id": string,"created_at": string,"date": string,"exchange_rate": string,"goal_id": string,"goal_name": string,"id": string,"iou_id": string,"note": string,"original_amount_minor": number,"original_currency": string,"payee": string,"recurring_rule_id": string,"type": Database["public"]['Enums']["transaction_type"]
             }[]
                            },
 "month_summary":
@@ -329,8 +380,14 @@ isOneToOne: false
               "payee": string
             }[]
                            },
+"reopen_goal":
+{ Args: { "p_goal_id": string }; Returns: undefined
+                           },
 "set_budget":
 { Args: { "p_amount_minor": number,"p_category_id": string,"p_month": string }; Returns: undefined
+                           },
+"set_goal_withdrawal_deleted":
+{ Args: { "p_deleted": boolean,"p_id": string }; Returns: undefined
                            },
 "set_recurring_rule_active":
 { Args: { "p_active": boolean,"p_id": string }; Returns: undefined
@@ -339,6 +396,9 @@ isOneToOne: false
 { Args: { "p_exclude_iou"?: boolean,"p_month": string }; Returns: {
               "category_id": string,"spent_minor": number
             }[]
+                           },
+"take_from_goal":
+{ Args: { "p_amount_minor": number,"p_date": string,"p_goal_id": string,"p_note"?: string }; Returns: string
                            },
 "update_iou":
 { Args: { "p_base_amount_minor": number,"p_date": string,"p_direction": Database["public"]['Enums']["iou_direction"],"p_due_date"?: string,"p_exchange_rate": string,"p_id": string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_person_name": string }; Returns: string
@@ -350,11 +410,11 @@ isOneToOne: false
 { Args: { "p_amount_minor": number,"p_base_amount_minor": number,"p_currency": string,"p_date": string,"p_exchange_rate": string,"p_id": string,"p_iou_currency_amount_minor": number,"p_iou_currency_rate": string,"p_note"?: string }; Returns: string
                            },
 "update_transaction":
-{ Args: { "p_base_amount_minor": number,"p_category_id": string,"p_date": string,"p_exchange_rate": string,"p_id": string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_payee"?: string,"p_type": Database["public"]['Enums']["transaction_type"] }; Returns: string
+{ Args: { "p_base_amount_minor": number,"p_category_id": string,"p_date": string,"p_exchange_rate": string,"p_goal_id"?: string,"p_id": string,"p_note"?: string,"p_original_amount_minor": number,"p_original_currency": string,"p_payee"?: string,"p_type": Database["public"]['Enums']["transaction_type"] }; Returns: string
                            }
           }
           Enums: {
-            "accent_theme": "graphite"|"green"|"teal"|"gold"|"rose","iou_direction": "lent"|"borrowed","recurrence_frequency": "daily"|"weekly"|"monthly"|"yearly","system_category_key": "lent"|"repayment_received"|"borrowed"|"repayment_paid","theme_mode": "light"|"dark"|"system","transaction_type": "expense"|"income"|"savings"|"investment"
+            "accent_theme": "graphite"|"green"|"teal"|"gold"|"rose","iou_direction": "lent"|"borrowed","recurrence_frequency": "daily"|"weekly"|"monthly"|"yearly","system_category_key": "lent"|"repayment_received"|"borrowed"|"repayment_paid"|"goal_withdrawal","theme_mode": "light"|"dark"|"system","transaction_type": "expense"|"income"|"savings"|"investment"|"withdrawal"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -470,7 +530,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "accent_theme": ["graphite", "green", "teal", "gold", "rose"],"iou_direction": ["lent", "borrowed"],"recurrence_frequency": ["daily", "weekly", "monthly", "yearly"],"system_category_key": ["lent", "repayment_received", "borrowed", "repayment_paid"],"theme_mode": ["light", "dark", "system"],"transaction_type": ["expense", "income", "savings", "investment"]
+            "accent_theme": ["graphite", "green", "teal", "gold", "rose"],"iou_direction": ["lent", "borrowed"],"recurrence_frequency": ["daily", "weekly", "monthly", "yearly"],"system_category_key": ["lent", "repayment_received", "borrowed", "repayment_paid", "goal_withdrawal"],"theme_mode": ["light", "dark", "system"],"transaction_type": ["expense", "income", "savings", "investment", "withdrawal"]
           }
         }
 } as const

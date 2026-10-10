@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { cx } from '@/lib/cx';
 import { strings } from '@/strings/en';
 import { BrandMark } from './BrandMark';
-import { leftNavItems, rightNavItems, type NavItem } from './navItems';
+import { leftNavItems, rightNavItems, sidebarOnlyNavItems, type NavItem } from './navItems';
 
 function SidebarLink({ item }: { item: NavItem }) {
   const Icon = item.icon;
@@ -42,7 +42,7 @@ export function Sidebar({ onAdd, addDisabled }: { onAdd: () => void; addDisabled
       </Button>
       <nav aria-label={strings.nav.label} className="mt-6 flex-1">
         <ul className="flex flex-col gap-1">
-          {[...leftNavItems, ...rightNavItems].map((item) => (
+          {[...leftNavItems, ...rightNavItems, ...sidebarOnlyNavItems].map((item) => (
             <SidebarLink key={item.to} item={item} />
           ))}
         </ul>

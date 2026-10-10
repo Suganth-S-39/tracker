@@ -10,10 +10,10 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { cx } from '@/lib/cx';
 import { useOnlineStatus } from '@/lib/hooks';
 import { strings } from '@/strings/en';
-import { useCategories, useSetCategoryHidden, type Category, type TransactionType } from './api';
+import { useCategories, useSetCategoryHidden, type Category } from './api';
 import { CategoryEditor } from './CategoryEditor';
 import { CategoryIcon } from './CategoryIcon';
-import { TRANSACTION_TYPES } from '@/features/transactions/kinds';
+import { ENTRY_KINDS, type EntryKind } from '@/features/transactions/kinds';
 
 const s = strings.categories;
 
@@ -30,7 +30,7 @@ export function CategoriesPage() {
   const open = (category?: Category) => setEditor((e) => ({ open: true, category, key: e.key + 1 }));
   const close = () => setEditor((e) => ({ ...e, open: false }));
 
-  function section(kind: TransactionType) {
+  function section(kind: EntryKind) {
     const list = (categories.data ?? []).filter((c) => c.kind === kind && !c.is_system);
     return (
       <Card key={kind} className="p-2">
@@ -95,7 +95,7 @@ export function CategoriesPage() {
         ) : (categories.isError && categories.data === undefined) ? (
           <ErrorState error={categories.error} onRetry={() => void categories.refetch()} />
         ) : (
-          TRANSACTION_TYPES.map(section)
+          ENTRY_KINDS.map(section)
         )}
       </div>
 

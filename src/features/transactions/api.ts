@@ -14,12 +14,15 @@ import type { TransactionType } from './kinds';
 type ListRow = Database['public']['Functions']['list_transactions']['Returns'][number];
 
 /** A transaction as listed. Rates are exact decimal strings. */
-export type Transaction = Omit<ListRow, 'payee' | 'note' | 'iou_id' | 'recurring_rule_id'> & {
+export type Transaction = Omit<ListRow, 'payee' | 'note' | 'iou_id' | 'recurring_rule_id' | 'goal_id' | 'goal_name'> & {
   // The generated types don't know which RETURNS TABLE columns are nullable.
   payee: string | null;
   note: string | null;
   iou_id: string | null;
   recurring_rule_id: string | null;
+  /** The savings goal this money went into, came out of, or bought (and its name). */
+  goal_id: string | null;
+  goal_name: string | null;
 };
 
 export type TransactionFilters = {
@@ -28,6 +31,7 @@ export type TransactionFilters = {
   from?: IsoDate;
   to?: IsoDate;
   search?: string;
+  goalId?: string;
 };
 
 type Cursor = { date: string; createdAt: string; id: string };
@@ -45,6 +49,7 @@ async function listTransactions(filters: TransactionFilters, limit: number, curs
     p_from: filters.from,
     p_to: filters.to,
     p_search: filters.search?.trim() || undefined,
+    p_goal_id: filters.goalId,
   });
   if (error) throw error;
   return data;
@@ -161,6 +166,8 @@ export type TransactionInput = {
   note: string;
   /** Repeat (new transactions only): creates the recurring rule with this as its first entry. */
   repeat?: 'daily' | 'weekly' | 'monthly' | 'yearly' | undefined;
+  /** Savings only: the goal the money goes into. */
+  goalId?: string | undefined;
 };
 
 export function useSaveTransaction() {
@@ -177,6 +184,7 @@ export function useSaveTransaction() {
         p_base_amount_minor: input.baseAmountMinor,
         p_payee: input.payee,
         p_note: input.note,
+        ...(input.goalId ? { p_goal_id: input.goalId } : {}),
       };
       const { data, error } = id
         ? await supabase.rpc('update_transaction', { p_id: id, ...args })

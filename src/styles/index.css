@@ -33,6 +33,7 @@
   --animate-fade-in: fade-in 200ms ease-out;
   --animate-fade-out: fade-out 140ms ease-in;
   --animate-pop-in: pop-in 140ms cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-confetti: confetti 950ms cubic-bezier(0.15, 0.7, 0.3, 1) both;
 
   @keyframes sheet-in {
     from { transform: translateY(100%); }
@@ -58,6 +59,11 @@
   @keyframes fade-out {
     from { opacity: 1; }
     to { opacity: 0; }
+  }
+  /* A goal marked as bought: each piece flies out to its own --dx/--dy and fades. */
+  @keyframes confetti {
+    from { opacity: 1; transform: translate(0, 0) rotate(0deg) scale(1); }
+    to { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--turn)) scale(0.5); }
   }
   /* Dropdown lists; transform-origin is set toward the control they open from. */
   @keyframes pop-in {

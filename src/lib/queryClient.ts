@@ -47,5 +47,10 @@ export const queryKeys = {
     allBudgets: ['tx', 'budgets'] as const,
     byCategory: (month: string, excludeIou: boolean) => ['tx', 'byCategory', month, excludeIou] as const,
     monthly: (from: string, to: string, excludeIou: boolean) => ['tx', 'monthly', from, to, excludeIou] as const,
+    // A goal's progress is the money linked to it, so goals refresh with every transaction write.
+    goals: (today: string) => ['tx', 'goals', today] as const,
   },
+  // Goal photos, fetched apart from the goals (large, rarely changed): the key names every goal
+  // with a photo and when it last changed, so editing one fetches them again.
+  goalPhotos: (version: string) => ['goalPhotos', version] as const,
 };

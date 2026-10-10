@@ -36,6 +36,7 @@ import {
   Sparkles,
   Sunset,
   Tag,
+  Target,
   TrainFront,
   TrendingUp,
   Utensils,
@@ -92,10 +93,14 @@ export const CATEGORY_ICONS: Readonly<Record<string, LucideIcon>> = {
   // Reserved IOU categories
   'hand-coins': HandCoins,
   handshake: Handshake,
+  // Reserved: money taken out of a savings goal
+  target: Target,
 };
 
-/** Icons users can pick for their own categories (the IOU ones are reserved). */
-export const PICKABLE_ICON_KEYS = Object.keys(CATEGORY_ICONS).filter((key) => key !== 'hand-coins' && key !== 'handshake');
+const RESERVED_ICON_KEYS = new Set(['hand-coins', 'handshake', 'target']);
+
+/** Icons users can pick for their own categories (the reserved ones are left out). */
+export const PICKABLE_ICON_KEYS = Object.keys(CATEGORY_ICONS).filter((key) => !RESERVED_ICON_KEYS.has(key));
 
 export function categoryIcon(key: string): LucideIcon {
   return CATEGORY_ICONS[key] ?? Tag;

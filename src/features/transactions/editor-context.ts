@@ -1,12 +1,15 @@
 import { createContext, useContext } from 'react';
 import type { Transaction } from './api';
-import type { TransactionType } from './kinds';
+import type { EntryKind } from './kinds';
 
-export type EditorKind = TransactionType | 'iou';
+export type EditorKind = EntryKind | 'iou';
 
 export type TransactionEditor = {
-  /** Opens the Add form, optionally on a given tab (the IOU page opens it on IOU). */
-  openCreate: (kind?: EditorKind) => void;
+  /**
+   * Opens the Add form, optionally on a given tab (the IOU page opens it on IOU), and for savings
+   * optionally into a goal (the goal page's Add money).
+   */
+  openCreate: (kind?: EditorKind, options?: { goalId?: string }) => void;
   openEdit: (transaction: Transaction) => void;
 };
 

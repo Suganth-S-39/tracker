@@ -8,6 +8,7 @@ import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { useToast } from '@/components/ui/toast-context';
 import { CategoryPicker } from '@/features/categories/CategoryPicker';
 import { selectableCategories, type Category } from '@/features/categories/api';
+import { openGoals, useGoals, type Goal } from '@/features/goals/api';
 import { IouForm } from '@/features/ious/IouForm';
 import { AmountField } from '@/features/money/AmountField';
 import { ConversionPanel } from '@/features/money/ConversionPanel';
@@ -21,7 +22,7 @@ import { strings } from '@/strings/en';
 import { useRecentPayees, useSaveTransaction, type Transaction, type TransactionInput } from './api';
 import type { EditorKind } from './editor-context';
 import { useDeleteWithUndo } from './useDeleteWithUndo';
-import { TRANSACTION_TYPES } from './kinds';
+import { ENTRY_KINDS, type EntryKind } from './kinds';
 
 /** How many recent payees the "Paid to" field suggests. */
 const PAYEE_SUGGESTIONS = 50;
@@ -33,21 +34,46 @@ type TransactionFormProps = {
   money: MoneyContext;
   categories: readonly Category[];
   transaction?: Transaction | undefined;
-  initialKind?: EditorKind;
+  initialKind?: EditorKind | undefined;
+  /** Savings into this goal (the goal page's Add money). */
+  initialGoalId?: string | undefined;
   onClose: () => void;
 };
 
 const s = strings.form;
 
 /**
- * Add / edit form (spec section 8): Expense / Income / IOU. The amount is focused on open;
- * foreign currencies show an editable rate and converted amount; new transactions can repeat.
+ * The goal picker's choices: no goal, then every open goal. A goal the transaction already belongs
+ * to that's since been bought or deleted stays listed, so editing a note doesn't unlink it.
  */
-export function TransactionForm({ money, categories, transaction, initialKind = 'expense', onClose }: TransactionFormProps) {
+function goalItems(goals: readonly Goal[], transaction: Transaction | undefined) {
+  const items = [{ value: '', label: s.noGoal }, ...openGoals(goals).map((goal) => ({ value: goal.id, label: goal.name }))];
+  const current = transaction?.goal_id;
+  if (current && !items.some((item) => item.value === current)) {
+    const name = goals.find((goal) => goal.id === current)?.name ?? transaction.goal_name;
+    items.push({ value: current, label: name ? s.closedGoal(name) : s.deletedGoal });
+  }
+  return items;
+}
+
+/**
+ * Add / edit form (spec section 8): Expense / Income / Savings / Investment / IOU. The amount is
+ * focused on open (not on touch screens); foreign currencies show an editable rate and converted
+ * amount; new transactions can repeat; savings can go into a goal.
+ */
+export function TransactionForm({
+  money,
+  categories,
+  transaction,
+  initialKind = 'expense',
+  initialGoalId,
+  onClose,
+}: TransactionFormProps) {
   const editing = transaction !== undefined;
   const { baseCurrency, exponentOf } = money;
 
-  const [kind, setKind] = useState<EditorKind>(transaction?.type ?? initialKind);
+  // Withdrawals never reach this form (they open their goal).
+  const [kind, setKind] = useState<EditorKind>(transaction && transaction.type !== 'withdrawal' ? transaction.type : initialKind);
   const [currency, setCurrency] = useState(transaction?.original_currency ?? baseCurrency);
   const [amountText, setAmountText] = useState(
     transaction ? amountInputValue(transaction.original_amount_minor, exponentOf(transaction.original_currency)) : '',
@@ -57,6 +83,7 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
   const [payee, setPayee] = useState(transaction?.payee ?? '');
   const [note, setNote] = useState(transaction?.note ?? '');
   const [repeat, setRepeat] = useState<Repeat>('none');
+  const [goalId, setGoalId] = useState(transaction?.goal_id ?? initialGoalId ?? '');
   // Editing without touching amount, currency or rate saves the stored values unchanged.
   const [moneyTouched, setMoneyTouched] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -66,6 +93,9 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
   const save = useSaveTransaction();
   const deleteWithUndo = useDeleteWithUndo();
   const payees = useRecentPayees();
+  // Only for savings: fetching (and re-rendering) as the sheet slides in would cost frames for
+  // the other tabs, which never show goals.
+  const goals = useGoals({ enabled: kind === 'savings' });
 
   const amountMinor = parseAmount(amountText, exponentOf(currency));
   const conversion = useConversion({
@@ -76,7 +106,11 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
     stored: transaction ? { currency: transaction.original_currency, rate: transaction.exchange_rate } : undefined,
   });
 
-  const type = kind === 'iou' ? 'expense' : kind;
+  const type: EntryKind = kind === 'iou' ? 'expense' : kind;
+  // Goals take savings only; the choice is kept while switching tabs but only sent for savings.
+  const savingsGoal = kind === 'savings' && goalId !== '' ? goalId : undefined;
+  const goalChoices = goalItems(goals.data ?? [], transaction);
+  const showGoal = kind === 'savings' && goalChoices.length > 1;
   const options = selectableCategories(categories, type, transaction?.category_id);
 
   const errors = {
@@ -121,12 +155,21 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
           baseAmountMinor,
           payee,
           note,
-          repeat: !editing && repeat !== 'none' ? repeat : undefined,
+          // Savings for a goal don't repeat (the database says so too).
+          repeat: !editing && repeat !== 'none' && !savingsGoal ? repeat : undefined,
+          goalId: savingsGoal,
         },
       },
       {
         onSuccess: () => {
-          toast({ message: editing ? strings.transactions.updated : strings.transactions.added[kind] });
+          const goalName = savingsGoal ? goalChoices.find((item) => item.value === savingsGoal)?.label : undefined;
+          toast({
+            message: editing
+              ? strings.transactions.updated
+              : goalName
+                ? strings.goals.addedTo(goalName)
+                : strings.transactions.added[type],
+          });
           onClose();
         },
       },
@@ -134,7 +177,7 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
   }
 
   const payeeListId = useId();
-  const kindOptions = (editing ? TRANSACTION_TYPES : [...TRANSACTION_TYPES, 'iou' as const]).map((value) => ({
+  const kindOptions = (editing ? ENTRY_KINDS : [...ENTRY_KINDS, 'iou' as const]).map((value) => ({
     value,
     label: s.kindTabs[value],
   }));
@@ -162,12 +205,16 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
               conversion.reset();
             }}
             money={money}
-            tone={kind}
+            tone={type}
             autoFocus
             error={shown(errors.amount)}
           />
 
           <ConversionPanel state={conversion} showErrors={showErrors} onEdit={() => setMoneyTouched(true)} />
+
+          {showGoal ? (
+            <SelectField label={s.goal} value={goalId} onChange={setGoalId} items={goalChoices} />
+          ) : null}
 
           <div>
             <CategoryPicker categories={options} value={categoryId} onChange={setCategoryId} error={shown(errors.category)} />
@@ -179,7 +226,7 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
           <div className="grid gap-4 wide:grid-cols-2">
             <TextField label={s.date} type="date" required value={date} onChange={(e) => setDate(e.target.value)} error={shown(errors.date)} />
             <TextField
-              label={s.payee[kind]}
+              label={s.payee[type]}
               hint={strings.common.optional}
               list={payeeListId}
               autoComplete="off"
@@ -197,7 +244,7 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
 
           <div className="grid gap-4 wide:grid-cols-2">
             <TextField label={s.note} hint={strings.common.optional} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
-            {editing ? null : (
+            {editing || savingsGoal ? null : (
               <SelectField
                 label={strings.recurring.repeat}
                 value={repeat}
@@ -226,7 +273,7 @@ export function TransactionForm({ money, categories, transaction, initialKind = 
               </Button>
             ) : null}
             <Button type="submit" size="lg" className="flex-1" loading={save.isPending} disabled={!online}>
-              {editing ? s.saveChanges : s.save[kind]}
+              {editing ? s.saveChanges : s.save[type]}
             </Button>
           </div>
         </form>
